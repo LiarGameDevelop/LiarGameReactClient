@@ -1,18 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { makeRoom } from '../modules/room'
 import Home from '../components/HomeUI';
 
 const HomeForm = ({ }) => {
+    const dispatch = useDispatch();
+    const { connectionInfo } = useSelector(({ room }) => {
+      return { connectionInfo: room.connectionInfo }
+    });
+
     const roomNo = useParams().roomNo;
     const navigate = useNavigate();
     const enterRoom = () => {
         navigate("/room");
-        console.log("enter room");
+        console.log("enter room: ", connectionInfo);
+        dispatch(makeRoom(
+            { "maxPersonCount": 5, "roomName": "front-room!", "ownerName":"heo"}
+        ));
     }
 
     const [createNew,setCreateNew] = useState(false);
     const [openExisting,setOpenExisting] = useState(false);
-
 
     return (
     <Home
