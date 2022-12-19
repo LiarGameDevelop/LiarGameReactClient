@@ -1,3 +1,19 @@
+##Structure
+
+src/pages > src/containers > src/components 
+
+### Directory
+* src/pages: 렌더링할 페이지 목록. 페이지를 구현하기 위한 src/conatiners의 컨테이너 호출
+
+* src/containers: 각 페이지에서 구현될 기능 및 관련 패러미터 모음. 컨테이너에서 실제 렌더링되는 UI 컴포넌트 호출. src/modules에서 각 페이지에서 사용될 API 호출
+
+* src/components: 실제 렌더링되는 UI 컴포넌트
+
+* src/lib/api: 백엔드 서버에서 호출될 API 목록
+
+* src/modules: src/lib/api의 API들을 프론트에서 처리하기 위한 모듈 모음.
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
