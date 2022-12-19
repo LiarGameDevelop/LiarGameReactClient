@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { deleteRoom } from '../modules/room'
-import Room from '../components/RoomUI';
+import RoomOwner from '../components/RoomOwnerUI';
+import RoomAttendee from '../components/RoomAttendeeUI';
 
 const RoomForm = () => {
     const dispatch = useDispatch();
@@ -13,6 +14,11 @@ const RoomForm = () => {
 
     const roomNo = useParams().roomNo;
     const navigate = useNavigate();
+
+    const [numOfRound, setNumOfRound] = useState(5);
+    const [numOfHint, setNumOfHint] = useState(1);
+
+    const [category, setCategory] = useState("선택카테고리목록");
 
     // //Connection Info
     // const [maxPerson, setMaxPerson] = useState(10);
@@ -25,16 +31,37 @@ const RoomForm = () => {
     // const [senderId, setSenderId] = ('');
 
     const leaveRoom = () => {
-        console.log("should handle leave room", connectionInfo.roomId, connectionInfo.senderId);
         if(connectionInfo)
+            console.log("should handle leave room", connectionInfo.roomId, connectionInfo.senderId);
             dispatch(deleteRoom({"roomId": connectionInfo.roomId, "ownerId": connectionInfo.senderId}));
         navigate("/");
     }
 
+    const setRounds = (n) => {
+        setNumOfRound(n);
+        console.log(n);
+    }
+
+    const setHints = (n) => {
+        setNumOfHint(n);
+        console.log(n);
+    }
+
+    const handleCategory = (v) => {
+        setCategory(v);
+        console.log(v);
+    }
+
     return (
-    <Room
+    <RoomOwner
         leaveRoom={leaveRoom}
         roomNo={roomNo}
+        category={category}
+        setCategory={handleCategory}
+        numOfRound={numOfRound}
+        setRounds={(n)=>setRounds(n)}
+        numOfHint={numOfHint}
+        setHints={setHints}
     />
   );
 };

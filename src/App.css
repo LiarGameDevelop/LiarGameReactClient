@@ -32,3 +32,22 @@ div#room-main {
   height: 98vh;
   background-color: white;
 }
+
+div#texting-area {
+  background-color: aliceblue;
+}
+
+
+div#radio-row {
+  flex-direction: row;
+}
+
+div#other-text {
+  width: 50%;
+  background-color: aqua;
+}
+
+div#my-text {
+  width: 50%;
+  background-color: yellow;
+}

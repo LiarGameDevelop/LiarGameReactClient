@@ -12,12 +12,17 @@ const HomeForm = ({ }) => {
 
     const roomNo = useParams().roomNo;
     const navigate = useNavigate();
-    const enterRoom = () => {
+
+    const createRoom = () => {
         navigate("/room");
         console.log("enter room: ", connectionInfo);
         dispatch(makeRoom(
             { "maxPersonCount": 5, "roomName": "front-room!", "ownerName":"heo"}
         ));
+    }
+    const enterRoom = () => {
+        navigate("/room");
+        console.log("enter room: ", connectionInfo);
     }
 
     const [createNew,setCreateNew] = useState(false);
@@ -29,6 +34,7 @@ const HomeForm = ({ }) => {
         setCreateNew={setCreateNew}
         openExisting={openExisting}
         setOpenExisting={setOpenExisting}
+        createRoom={createRoom}
         enterRoom={enterRoom}
     />
     );

@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Grid } from '@mui/material';
 import InputModal from './common/InputModal'
 
-const HomeUI = ({ createNew, setCreateNew, openExisting, setOpenExisting, enterRoom }) => {
+const HomeUI = ({ createNew, setCreateNew, openExisting, setOpenExisting, createRoom, enterRoom }) => {
     return (
         <React.Fragment>
             <main>
@@ -27,7 +27,7 @@ const HomeUI = ({ createNew, setCreateNew, openExisting, setOpenExisting, enterR
                 cancel={()=>setCreateNew(false)}
                 submit={()=>{
                         setCreateNew(false)
-                        enterRoom()
+                        createRoom()
                     }
                 }
             />
