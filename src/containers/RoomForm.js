@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { deleteRoom } from '../modules/room'
+import { connectStomp } from '../modules/stomp'
 import RoomOwner from '../components/RoomOwnerUI';
 import RoomAttendee from '../components/RoomAttendeeUI';
 
 const RoomForm = () => {
     const dispatch = useDispatch();
-    const { connectionInfo } = useSelector(({ room }) => {
+    const { connectionInfo, stompClient } = useSelector(({ room, stomp }) => {
         return { connectionInfo: room.connectionInfo }
     });
   
@@ -20,20 +21,23 @@ const RoomForm = () => {
 
     const [category, setCategory] = useState("선택카테고리목록");
 
-    // //Connection Info
-    // const [maxPerson, setMaxPerson] = useState(10);
-    // const [ownerId, setOwnerId] = useState(1);
-    // // const [roomId, setRoomID]
-    // const [person, setPerson] = useState(0);
+    useEffect(() => {
+        console.log("connection info change ", connectionInfo);
+        if(connectionInfo) {
+            console.log("start connectStomp", connectionInfo);
+            dispatch(connectStomp({connectionInfo}));
+        }
+      }, [connectionInfo]);
 
     // //Message Info
     // const [message, setMessage] = ('');
     // const [senderId, setSenderId] = ('');
 
     const leaveRoom = () => {
-        if(connectionInfo)
+        if(connectionInfo) {
             console.log("should handle leave room", connectionInfo.roomId, connectionInfo.senderId);
             dispatch(deleteRoom({"roomId": connectionInfo.roomId, "ownerId": connectionInfo.senderId}));
+        }
         navigate("/");
     }
 

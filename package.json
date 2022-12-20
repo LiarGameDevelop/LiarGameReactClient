@@ -6,6 +6,8 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@mui/material": "^5.10.16",
+    "@stomp/stompjs": "^6.1.2",
+    "@types/stompjs": "^2.3.5",
     "axios": "^1.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

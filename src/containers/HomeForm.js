@@ -15,7 +15,7 @@ const HomeForm = ({ }) => {
 
     const createRoom = () => {
         navigate("/room");
-        console.log("enter room: ", connectionInfo);
+        console.log("create room: ", connectionInfo);
         dispatch(makeRoom(
             { "maxPersonCount": 5, "roomName": "front-room!", "ownerName":"heo"}
         ));

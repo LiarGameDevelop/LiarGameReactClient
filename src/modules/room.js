@@ -5,32 +5,32 @@ import createRequestSaga, {
 } from '../lib/CreateRequestSaga';
 import * as roomAPI from '../lib/api/room';
 
-const [POST_MOVIE_MAKE, POST_MOVIE_MAKE_SUCCESS, POST_MOVIE_MAKE_FAILURE] = createRequestActionTypes(
+const [POST_ROOM_MAKE, POST_ROOM_MAKE_SUCCESS, POST_ROOM_MAKE_FAILURE] = createRequestActionTypes(
     'room/MAKE'
 );
 
-const [DELETE_MOVIE_DELETE, DELETE_MOVIE_DELETE_SUCCESS, DELETE_MOVIE_DELETE_FAILURE] = createRequestActionTypes(
+const [DELETE_ROOM_DELETE, DELETE_ROOM_DELETE_SUCCESS, DELETE_ROOM_DELETE_FAILURE] = createRequestActionTypes(
     'room/DELETE'
 );
 
-export const makeRoom = createAction(POST_MOVIE_MAKE, ({ maxPersonCount, roomName, ownerName }) => ({
+export const makeRoom = createAction(POST_ROOM_MAKE, ({ maxPersonCount, roomName, ownerName }) => ({
     maxPersonCount,
     roomName,
     ownerName,
 }));
 
-export const deleteRoom = createAction(DELETE_MOVIE_DELETE, ({ roomId, ownerId }) => ({
+export const deleteRoom = createAction(DELETE_ROOM_DELETE, ({ roomId, ownerId }) => ({
     roomId,
     ownerId,
 }));
 
 // saga
-const makeRoomSaga = createRequestSaga(POST_MOVIE_MAKE, roomAPI.makeRoom);
-const deleteRoomSaga = createRequestSaga(DELETE_MOVIE_DELETE, roomAPI.deleteRoom);
+const makeRoomSaga = createRequestSaga(POST_ROOM_MAKE, roomAPI.makeRoom);
+const deleteRoomSaga = createRequestSaga(DELETE_ROOM_DELETE, roomAPI.deleteRoom);
 
 export function* roomSaga() {
-    yield takeLatest(POST_MOVIE_MAKE, makeRoomSaga);
-    yield takeLatest(DELETE_MOVIE_DELETE, deleteRoomSaga);
+    yield takeLatest(POST_ROOM_MAKE, makeRoomSaga);
+    yield takeLatest(DELETE_ROOM_DELETE, deleteRoomSaga);
 }
 
 const initialState = {
@@ -40,21 +40,21 @@ const initialState = {
 
 const room = handleActions(
     {
-        [POST_MOVIE_MAKE_SUCCESS]: (state, { payload: connection_info }) => ({
+        [POST_ROOM_MAKE_SUCCESS]: (state, { payload: connection_info }) => ({
             ...state,
             connectionInfo: connection_info,
             error: null,
         }),
-        [POST_MOVIE_MAKE_FAILURE]: (state, { payload: error }) => ({
+        [POST_ROOM_MAKE_FAILURE]: (state, { payload: error }) => ({
             ...state,
             error,
         }),
-        [DELETE_MOVIE_DELETE_SUCCESS]: (state, _) => ({
+        [DELETE_ROOM_DELETE_SUCCESS]: (state, _) => ({
             ...state,
             connectionInfo: null,
             error: null,
         }),
-        [DELETE_MOVIE_DELETE_FAILURE]: (state, { payload: error }) => ({
+        [DELETE_ROOM_DELETE_FAILURE]: (state, { payload: error }) => ({
             ...state,
             error,
         }),
