@@ -14,15 +14,15 @@ const HomeForm = ({ }) => {
     const navigate = useNavigate();
 
     const createRoom = () => {
-        navigate("/room");
-        console.log("create room: ", connectionInfo);
+        navigate("/game");
+        console.log("create game: ", connectionInfo);
         dispatch(makeRoom(
             { "maxPersonCount": 5, "roomName": "front-room!", "ownerName":"heo"}
         ));
     }
     const enterRoom = () => {
-        navigate("/room");
-        console.log("enter room: ", connectionInfo);
+        navigate("/game");
+        console.log("enter game: ", connectionInfo);
     }
 
     const [createNew,setCreateNew] = useState(false);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Grid } from '@mui/material';
+import CreateRoomModal from './common/CreateRoomModal'
 import InputModal from './common/InputModal'
 
 const HomeUI = ({ createNew, setCreateNew, openExisting, setOpenExisting, createRoom, enterRoom }) => {
@@ -19,9 +20,9 @@ const HomeUI = ({ createNew, setCreateNew, openExisting, setOpenExisting, create
                     </Grid>
                 </Grid>
             </main>
-            <InputModal
+            <CreateRoomModal
                 open={createNew}
-                message="player 수를 설정하십시오."
+                message="방 만들기"
                 label="player"
                 // value={connections}
                 cancel={()=>setCreateNew(false)}
