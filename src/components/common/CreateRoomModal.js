@@ -58,7 +58,7 @@ export default function CreateRoomModal({ open, message, cancel, submit }) {
                 <Grid container id="create-parameters" rowSpacing={1}> 
                     {
                         Array.from({ length: topics.length },(_,i) => 
-                            <Grid item xs={3}>
+                            <Grid item xs={3} key={i}>
                                 <Button variant="contained" style={{ width: "90%" }}>
                                     {topics[i]}
                                 </Button>

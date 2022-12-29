@@ -40,6 +40,19 @@ const GameForm = ({ }) => {
         navigate("/");
     }
 
+    const toResult = () => {
+        console.log("leave room with sock client")
+        if(connectionInfo) {
+            console.log("should handle leave room", connectionInfo.roomId, connectionInfo.senderId);
+            // dispatch(deleteRoom({"roomId": connectionInfo.roomId, "ownerId": connectionInfo.senderId}));
+        }
+        if(stompClient) {
+            console.log("should disconnect socket");
+            disconnect();
+        }
+        navigate("/result");
+    }
+
     //socket-start
     const socketEndPoint = `${process.env.REACT_APP_HOST}/ws-connection`
     const socket = new SockJS(socketEndPoint);
@@ -97,6 +110,7 @@ const GameForm = ({ }) => {
     return (
     <Game
         leaveRoom={leaveRoom}
+        toResult={toResult}
         members={members}
     />
     );

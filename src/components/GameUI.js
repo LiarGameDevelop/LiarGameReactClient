@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material';
 
-const RoomUI = ({leaveRoom, members }) => {
+const GameUI = ({leaveRoom, toResult, members }) => {
     return (
         <main>
             <Grid container id="game-main" direction="row" alignItems="baseline"  spacing={1}>
@@ -9,7 +9,7 @@ const RoomUI = ({leaveRoom, members }) => {
                     <Grid container direction="column" spacing={1}>
                     {
                         Array.from({ length: members.length/2 },(_,i) => 
-                            <Grid item>
+                            <Grid item key={i}>
                                 <Paper>
                                     <Grid container direction="column">
                                         <Grid item>
@@ -120,12 +120,12 @@ const RoomUI = ({leaveRoom, members }) => {
                             </Grid>    
                         </Grid>
                         <Grid item>
-                            <Button variant="contained" onClick={()=>leaveRoom()}>
+                            <Button variant="contained" onClick={toResult}>
                                 결과로-to be removed
                             </Button>
                         </Grid>
                         <Grid item>
-                            <Button variant="contained" onClick={()=>leaveRoom()}>
+                            <Button variant="contained" onClick={leaveRoom}>
                                 방 나가기-to be removed
                             </Button>
                         </Grid>
@@ -135,7 +135,7 @@ const RoomUI = ({leaveRoom, members }) => {
                     <Grid container direction="column" spacing={1}>
                     {
                         Array.from({ length: members.length/2 },(_,i) => 
-                            <Grid item>
+                            <Grid item key={i}>
                                 <Paper>
                                     <Grid container direction="column">
                                         <Grid item>
@@ -172,4 +172,4 @@ const RoomUI = ({leaveRoom, members }) => {
       );
 }
 
-export default RoomUI;
+export default GameUI;

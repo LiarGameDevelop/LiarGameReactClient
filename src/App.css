@@ -57,6 +57,11 @@ div#my-text {
   background-color: yellow;
 }
 
+div#result-main {
+  padding: 10px;
+}
+
+
 div#create-parameters {
   display: flex;
   flex-direction: row;
