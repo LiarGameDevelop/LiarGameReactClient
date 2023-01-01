@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import { leaveRoom } from '../modules/room'
 
 //TODO: Socket 관련 코드는 별도 store로 옮기는걸로 장기적으로.
 import SockJS from 'sockjs-client';
@@ -27,11 +28,11 @@ const GameForm = ({ }) => {
         }
       }, [connectionInfo]);
 
-    const leaveRoom = () => {
+    const leaveTheRoom = () => {
         console.log("leave room with sock client")
         if(connectionInfo) {
             console.log("should handle leave room", connectionInfo.roomId, connectionInfo.senderId);
-            // dispatch(deleteRoom({"roomId": connectionInfo.roomId, "ownerId": connectionInfo.senderId}));
+            dispatch(leaveRoom({"roomId": connectionInfo.roomId, "senderId": connectionInfo.ownerId}));
         }
         if(stompClient) {
             console.log("should disconnect socket");
@@ -64,7 +65,7 @@ const GameForm = ({ }) => {
             return;
         }
         console.log("try connect",connectionInfo);
-    
+
         stompClient.connect({"username":"chulsoo","roomId":connectionInfo.roomId}, function (frame) {
             // setConnected(true)
             console.log('Connected: ' + frame)
@@ -109,7 +110,7 @@ const GameForm = ({ }) => {
 
     return (
     <Game
-        leaveRoom={leaveRoom}
+        leaveTheRoom={leaveTheRoom}
         toResult={toResult}
         members={members}
     />

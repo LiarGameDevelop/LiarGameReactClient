@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { makeRoom } from '../modules/room'
+import { makeRoom, enterRoom } from '../modules/room'
 import Home from '../components/HomeUI';
 
 const HomeForm = ({ }) => {
@@ -10,7 +10,6 @@ const HomeForm = ({ }) => {
       return { connectionInfo: room.connectionInfo }
     });
 
-    const roomNo = useParams().roomNo;
     const navigate = useNavigate();
 
     const createRoom = () => {
@@ -20,22 +19,26 @@ const HomeForm = ({ }) => {
             { "maxPersonCount": 5, "roomName": "front-room!", "ownerName":"heo"}
         ));
     }
-    const enterRoom = () => {
+
+    const enterExisting = () => {
         navigate("/game");
         console.log("enter game: ", connectionInfo);
+        dispatch(enterRoom(
+            { "roomId": roomCode, "ownerName":"so"}
+        ));
     }
 
     const [createNew,setCreateNew] = useState(false);
-    const [openExisting,setOpenExisting] = useState(false);
+    const [roomCode, setRoomCode] = useState('');
 
     return (
     <Home
         createNew={createNew}
         setCreateNew={setCreateNew}
-        openExisting={openExisting}
-        setOpenExisting={setOpenExisting}
         createRoom={createRoom}
-        enterRoom={enterRoom}
+        enterExisting={enterExisting}
+        roomCode={roomCode}
+        setRoomCode={setRoomCode}
     />
     );
 };

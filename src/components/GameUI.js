@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material';
 
-const GameUI = ({leaveRoom, toResult, members }) => {
+const GameUI = ({leaveTheRoom, toResult, members }) => {
     return (
         <main>
             <Grid container id="game-main" direction="row" alignItems="baseline"  spacing={1}>
@@ -125,7 +125,7 @@ const GameUI = ({leaveRoom, toResult, members }) => {
                             </Button>
                         </Grid>
                         <Grid item>
-                            <Button variant="contained" onClick={leaveRoom}>
+                            <Button variant="contained" onClick={leaveTheRoom}>
                                 방 나가기-to be removed
                             </Button>
                         </Grid>

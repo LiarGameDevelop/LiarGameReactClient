@@ -13,6 +13,14 @@ const [DELETE_ROOM_DELETE, DELETE_ROOM_DELETE_SUCCESS, DELETE_ROOM_DELETE_FAILUR
     'room/DELETE'
 );
 
+const [POST_ROOM_ENTER, POST_ROOM_ENTER_SUCCESS, POST_ROOM_ENTER_FAILURE] = createRequestActionTypes(
+    'room/ENTER'
+);
+
+const [POST_ROOM_LEAVE, POST_ROOM_LEAVE_SUCCESS, POST_ROOM_LEAVE_FAILURE] = createRequestActionTypes(
+    'room/LEAVE'
+);
+
 export const makeRoom = createAction(POST_ROOM_MAKE, ({ maxPersonCount, roomName, ownerName }) => ({
     maxPersonCount,
     roomName,
@@ -24,13 +32,27 @@ export const deleteRoom = createAction(DELETE_ROOM_DELETE, ({ roomId, ownerId })
     ownerId,
 }));
 
+export const enterRoom = createAction(POST_ROOM_ENTER, ({ roomId, senderId }) => ({
+    roomId,
+    senderId,
+}));
+
+export const leaveRoom = createAction(POST_ROOM_LEAVE, ({ roomId, senderId }) => ({
+    roomId,
+    senderId,
+}));
+
 // saga
 const makeRoomSaga = createRequestSaga(POST_ROOM_MAKE, roomAPI.makeRoom);
 const deleteRoomSaga = createRequestSaga(DELETE_ROOM_DELETE, roomAPI.deleteRoom);
+const enterRoomSaga = createRequestSaga(POST_ROOM_ENTER, roomAPI.enterRoom);
+const leaveRoomSaga = createRequestSaga(POST_ROOM_LEAVE, roomAPI.leaveRoom);
 
 export function* roomSaga() {
     yield takeLatest(POST_ROOM_MAKE, makeRoomSaga);
     yield takeLatest(DELETE_ROOM_DELETE, deleteRoomSaga);
+    yield takeLatest(POST_ROOM_ENTER, enterRoomSaga);
+    yield takeLatest(POST_ROOM_LEAVE, leaveRoomSaga);
 }
 
 const initialState = {
@@ -55,6 +77,24 @@ const room = handleActions(
             error: null,
         }),
         [DELETE_ROOM_DELETE_FAILURE]: (state, { payload: error }) => ({
+            ...state,
+            error,
+        }),
+        [POST_ROOM_ENTER_SUCCESS]: (state, { payload: connection_info }) => ({
+            ...state,
+            connectionInfo: connection_info,
+            error: null,
+        }),
+        [POST_ROOM_ENTER_FAILURE]: (state, { payload: error }) => ({
+            ...state,
+            error,
+        }),
+        [POST_ROOM_LEAVE_SUCCESS]: (state, { payload: connection_info }) => ({
+            ...state,
+            connectionInfo: connection_info,
+            error: null,
+        }),
+        [POST_ROOM_LEAVE_FAILURE]: (state, { payload: error }) => ({
             ...state,
             error,
         }),
