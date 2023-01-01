@@ -32,7 +32,7 @@ const GameForm = ({ }) => {
         console.log("leave room with sock client")
         if(connectionInfo) {
             console.log("should handle leave room", connectionInfo.roomId, connectionInfo.senderId);
-            dispatch(leaveRoom({"roomId": connectionInfo.roomId, "senderId": connectionInfo.ownerId}));
+            dispatch(leaveRoom({"roomId": connectionInfo.roomId, "userId": "so"}));
         }
         if(stompClient) {
             console.log("should disconnect socket");

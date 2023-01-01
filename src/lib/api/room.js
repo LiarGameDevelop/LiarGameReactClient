@@ -4,11 +4,11 @@ import client from './client';
 export const makeRoom = ({ maxPersonCount, roomName, ownerName }) =>
   client.post('/room', { maxPersonCount, roomName, ownerName });
 
-export const enterRoom = ({ roomId, senderId }) =>
-client.post('/room/enter', { roomId, senderId });
+export const enterRoom = ({ roomId, userId }) =>
+client.post('/room/enter', { roomId, userId });
 
-export const leaveRoom = ({ roomId, senderId }) =>
-client.post('/room/leave', { roomId, senderId });
+export const leaveRoom = ({ roomId, userId }) =>
+client.post('/room/leave', { roomId, userId });
 
 export const deleteRoom = ({ roomId, ownerId }) =>
 client.delete('/room', { roomId, ownerId });

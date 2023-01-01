@@ -32,14 +32,14 @@ export const deleteRoom = createAction(DELETE_ROOM_DELETE, ({ roomId, ownerId })
     ownerId,
 }));
 
-export const enterRoom = createAction(POST_ROOM_ENTER, ({ roomId, senderId }) => ({
+export const enterRoom = createAction(POST_ROOM_ENTER, ({ roomId, userId }) => ({
     roomId,
-    senderId,
+    userId,
 }));
 
-export const leaveRoom = createAction(POST_ROOM_LEAVE, ({ roomId, senderId }) => ({
+export const leaveRoom = createAction(POST_ROOM_LEAVE, ({ roomId, userId }) => ({
     roomId,
-    senderId,
+    userId,
 }));
 
 // saga

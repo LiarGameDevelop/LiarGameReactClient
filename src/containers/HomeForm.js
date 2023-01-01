@@ -24,7 +24,7 @@ const HomeForm = ({ }) => {
         navigate("/game");
         console.log("enter game: ", connectionInfo);
         dispatch(enterRoom(
-            { "roomId": roomCode, "ownerName":"so"}
+            { "roomId": roomCode, "userId":"so"}
         ));
     }
 
