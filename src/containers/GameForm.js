@@ -26,7 +26,11 @@ const GameForm = ({ }) => {
             console.log("start connectStomp", connectionInfo);
             connect(); //socket connect
         }
-      }, [connectionInfo]);
+    }, [connectionInfo]);
+
+    const startGame = () => {
+        console.log("start game!");
+    }
 
     const leaveTheRoom = () => {
         console.log("leave room with sock client")
@@ -110,6 +114,7 @@ const GameForm = ({ }) => {
 
     return (
     <Game
+        startGame={startGame}
         leaveTheRoom={leaveTheRoom}
         toResult={toResult}
         members={members}

@@ -45,16 +45,7 @@ div#game-info {
 
 div#texting-area {
   background-color: aliceblue;
-}
-
-div#other-text {
-  width: 50%;
-  background-color: aqua;
-}
-
-div#my-text {
-  width: 50%;
-  background-color: yellow;
+  padding-inline-start: 10px;
 }
 
 div#result-main {
@@ -76,4 +67,28 @@ p#parameter-label {
 p#parameter-value {
   margin-inline-start: 0.5em;
   margin-inline-end: 0.5em;
+}
+
+#player0{
+  color: #c51111;
+}
+
+#player1{
+  color: #132ed1;
+}
+
+#player2{
+  color: #117f2d;
+}
+
+#player3{
+  color: #71491e;
+}
+
+#player4{
+  color: #ef7d0d;
+}
+
+#player5{
+  color: #6b2fbb;
 }

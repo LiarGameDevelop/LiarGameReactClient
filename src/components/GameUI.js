@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material';
+import { Person } from "@mui/icons-material"
 
-const GameUI = ({leaveTheRoom, toResult, members }) => {
+const GameUI = ({ startGame, leaveTheRoom, toResult, members }) => {
     return (
         <main>
             <Grid container id="game-main" direction="row" alignItems="baseline"  spacing={1}>
@@ -10,12 +11,12 @@ const GameUI = ({leaveTheRoom, toResult, members }) => {
                     {
                         Array.from({ length: members.length/2 },(_,i) => 
                             <Grid item key={i}>
-                                <Paper>
+                                <Paper >
                                     <Grid container direction="column">
                                         <Grid item>
                                             <Grid container direction="row" justifyContent="space-around" alignItems="center">
                                                 <Grid item>
-                                                    <p>icon</p>
+                                                    <Person id={`player${2*i}`} fontSize='large' />
                                                 </Grid>
                                                 <Grid item>
                                                     <Paper>
@@ -52,7 +53,7 @@ const GameUI = ({leaveTheRoom, toResult, members }) => {
                                                 <p>게임정보</p>
                                             </Grid>
                                             <Grid item>
-                                                <Button variant="contained">
+                                                <Button variant="contained" onClick={()=>startGame()}>
                                                     Start
                                                 </Button>
                                             </Grid>
@@ -84,24 +85,10 @@ const GameUI = ({leaveTheRoom, toResult, members }) => {
                             </Paper>
                         </Grid>
                         <Grid item>
-                            <Grid id="texting-area" container direction="column" spacing={1}>
-                                <Grid item>
-                                    <Grid container direction="row" justifyContent="flex-start">
-                                        <Paper>user1</Paper>
-                                        <Paper id="other-text">other message</Paper>
-                                    </Grid>
-                                </Grid>
-                                <Grid item>
-                                    <Grid container direction="row" justifyContent="flex-end">
-                                        <Paper id="my-text">my message</Paper>
-                                    </Grid>
-                                </Grid>
-                                <Grid item>
-                                    <Grid container direction="row" justifyContent="flex-start">
-                                        <Paper>user2</Paper>
-                                        <Paper id="other-text">other message</Paper>
-                                    </Grid>
-                                </Grid>
+                            <Grid id="texting-area" container direction="column">
+                                <p id="player0">user1:하드 코딩된 대화문 시작</p>
+                                <p id="player1">user2: ㅎㅇㅎㅇ</p>
+                                <p id="player2">user3: ㅎㅇㅎㅇ</p>
                             </Grid>
                         </Grid>
                         <Grid item>
@@ -141,7 +128,7 @@ const GameUI = ({leaveTheRoom, toResult, members }) => {
                                         <Grid item>
                                             <Grid container direction="row" justifyContent="space-around" alignItems="center">
                                                 <Grid item>
-                                                    <p>icon</p>
+                                                    <Person id={`player${2*i + 1}`} fontSize='large' />
                                                 </Grid>
                                                 <Grid item>
                                                     <Paper>
