@@ -29,6 +29,8 @@ const HomeForm = ({ }) => {
     }
 
     const [createNew,setCreateNew] = useState(false);
+    const [openHelp, setOpenHelp] = useState(false);
+    const [nickname, setNickname] = useState('');
     const [roomCode, setRoomCode] = useState('');
 
     return (
@@ -37,8 +39,12 @@ const HomeForm = ({ }) => {
         setCreateNew={setCreateNew}
         createRoom={createRoom}
         enterExisting={enterExisting}
+        nickname={nickname}
+        setNickname={setNickname}
         roomCode={roomCode}
         setRoomCode={setRoomCode}
+        openHelp={openHelp}
+        setOpenHelp={setOpenHelp}
     />
     );
 };
