@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { deleteRoom } from '../modules/room'
-import { connectStomp } from '../modules/stomp'
+import { connectStomp, disconnectStomp } from '../modules/stomp'
 import RoomOwner from '../components/RoomOwnerUI';
-import RoomAttendee from '../components/RoomAttendeeUI';
 
 const RoomForm = () => {
     const dispatch = useDispatch();
     const { connectionInfo, stompClient } = useSelector(({ room, stomp }) => {
-        return { connectionInfo: room.connectionInfo }
+        return { connectionInfo: room.connectionInfo, stompClient: stomp.stompClient }
     });
   
 
@@ -34,9 +33,14 @@ const RoomForm = () => {
     // const [senderId, setSenderId] = ('');
 
     const leaveRoom = () => {
-        if(connectionInfo) {
-            console.log("should handle leave room", connectionInfo.roomId, connectionInfo.senderId);
-            dispatch(deleteRoom({"roomId": connectionInfo.roomId, "ownerId": connectionInfo.senderId}));
+        console.log("leave room with sock client",stompClient)
+        // if(connectionInfo) {
+        //     console.log("should handle leave room", connectionInfo.roomId, connectionInfo.senderId);
+        //     dispatch(deleteRoom({"roomId": connectionInfo.roomId, "ownerId": connectionInfo.senderId}));
+        // }
+        if(stompClient) {
+            console.log("should disconnect socket");
+            dispatch(disconnectStomp(stompClient));
         }
         navigate("/");
     }
