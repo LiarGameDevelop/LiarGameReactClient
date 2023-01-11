@@ -4,16 +4,24 @@ import createRequestSaga, {
   createRequestActionTypes
 } from '../lib/CreateRequestSaga';
 import SockJS from 'sockjs-client';
-import { Client as StompJs } from '@stomp/stompjs';
+import { Stomp } from '@stomp/stompjs';
 
 const socketEndPoint = `${process.env.REACT_APP_HOST}/ws-connection`
 
 const [STOMP_CONNECT, STOMP_CONNECT_SUCCESS, STOMP_CONNECT_FAILURE] = createRequestActionTypes(
-    'stomp/MAKE'
+    'stomp/CONNECT'
+);
+
+const [STOMP_DISCONNECT, STOMP_DISCONNECT_SUCCESS, STOMP_DISCONNECT_FAILURE] = createRequestActionTypes(
+    'stomp/DISCONNECT'
 );
 
 export const connectStomp = createAction(STOMP_CONNECT, ({ connectionInfo }) => ({
     connectionInfo
+}));
+
+export const disconnectStomp = createAction(STOMP_DISCONNECT, ({stompClient}) => ({
+    stompClient
 }));
 
 const connect = (connectionInfo) => {
@@ -26,10 +34,10 @@ const connect = (connectionInfo) => {
 
     const socket = new SockJS(socketEndPoint);
     console.log("new socket made", JSON.stringify(socket));
-    const stompClient = StompJs.over(socket);
-    console.log("stompClient :",JSON.stringify(stompClient));
+    const stompClient = Stomp.over(socket);
+    // console.log("stompClient :", JSON.stringify(stompClient));
 
-    stompClient.connect({"username":"chulsoo","roomId":connectionInfo.roomId}, function (frame) {
+    return stompClient.connect({"username":"chulsoo","roomId":connectionInfo.roomId}, function (frame) {
         // setConnected(true)
         console.log('Connected: ' + frame)
 
@@ -57,8 +65,15 @@ const connect = (connectionInfo) => {
         stompClient.subscribe(`/subscribe/system/private/${connectionInfo.roomId}`, function (frame) {
             addChat("gameserver :"+frame.body);
         })
+        // return stompClient;
     })
-    return stompClient;
+    
+}
+
+const disconnect = (stompClient) => {
+    if(stompClient) {
+        stompClient.disconnect();
+    }
 }
 
 const addChat = (message) => {
@@ -67,9 +82,11 @@ const addChat = (message) => {
 
 // saga
 const connectStompSaga = createRequestSaga(STOMP_CONNECT, connect);
+const disconnectStompSaga = createRequestSaga(STOMP_DISCONNECT, disconnect);
 
 export function* stompSaga() {
     yield takeLatest(STOMP_CONNECT, connectStompSaga);
+    yield takeLatest(STOMP_DISCONNECT, disconnectStompSaga);
 }
 
 const initialState = {
@@ -85,6 +102,15 @@ const stomp = handleActions(
             error: null,
         }),
         [STOMP_CONNECT_FAILURE]: (state, { payload: error }) => ({
+            ...state,
+            error,
+        }),
+        [STOMP_DISCONNECT_SUCCESS]: (state, { }) => ({
+            ...state,
+            stompClient: null,
+            error: null,
+        }),
+        [STOMP_DISCONNECT_FAILURE]: (state, { payload: error }) => ({
             ...state,
             error,
         }),

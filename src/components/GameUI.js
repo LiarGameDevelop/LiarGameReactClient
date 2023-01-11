@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material';
 import { Person } from "@mui/icons-material"
 
-const GameUI = ({ startGame, leaveTheRoom, toResult, members }) => {
+const GameUI = ({ startGame, leaveTheRoom, toResult, members, message, setMessage, sendMessage }) => {
     return (
         <main>
             <Grid container id="game-main" direction="row" alignItems="baseline"  spacing={1}>
@@ -95,12 +95,13 @@ const GameUI = ({ startGame, leaveTheRoom, toResult, members }) => {
                             <Grid container direction="row" alignItems="center">
                                 <Grid item xs={10}>
                                     <TextField
-                                        onChange={()=>console.log("e")}
+                                        onChange={(e)=>setMessage(e.target.value)}
+                                        value={message}
                                         style={{width:"95%"}}
                                     />
                                 </Grid>
                                 <Grid item xs={2}>
-                                    <Button variant="contained" onClick={()=>console.log('message 입력')}>
+                                    <Button variant="contained" onClick={()=>sendMessage()}>
                                         전송
                                     </Button>
                                 </Grid>

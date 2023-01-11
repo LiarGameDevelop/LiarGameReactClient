@@ -28,15 +28,13 @@ const GameForm = ({ }) => {
         }
     }, [connectionInfo]);
 
-    const startGame = () => {
-        console.log("start game!");
-    }
+    const [message, setMessage] = useState('');
 
     const leaveTheRoom = () => {
         console.log("leave room with sock client")
         if(connectionInfo) {
             console.log("should handle leave room", connectionInfo.roomId, connectionInfo.senderId);
-            dispatch(leaveRoom({"roomId": connectionInfo.roomId, "userId": "so"}));
+            dispatch(leaveRoom({ "roomId": connectionInfo.roomId, "userId": "so" }));
         }
         if(stompClient) {
             console.log("should disconnect socket");
@@ -70,7 +68,7 @@ const GameForm = ({ }) => {
         }
         console.log("try connect",connectionInfo);
 
-        stompClient.connect({"username":"chulsoo","roomId":connectionInfo.roomId}, function (frame) {
+        stompClient.connect({"username":connectionInfo.userList[0].username,"roomId":connectionInfo.roomId}, function (frame) {
             // setConnected(true)
             console.log('Connected: ' + frame)
     
@@ -78,31 +76,62 @@ const GameForm = ({ }) => {
     
             //클라이언트끼리 대화
             stompClient.subscribe(`/subscribe/room/${connectionInfo.roomId}/chat`, function (frame) {
-                addChat(frame.body)
+                console.log("subscribe chat", frame.body);
+                // addChat(frame.body)
             })
     
             //사람 들어온것 =>웹소켓, STOMP 연결하면 자동으로 날라오는것.
             stompClient.subscribe(`/subscribe/room.login/${connectionInfo.roomId}`, function (frame) {
                 //addChat(greeting)
                 console.info(`Someone entered in room id ${connectionInfo.roomId}`)
-                addChat("entered:"+frame.body);
+                // addChat("entered:"+frame.body);
             })
     
             //사람 나간것
             stompClient.subscribe(`/subscribe/room.logout/${connectionInfo.roomId}`, function (frame) {
                 console.info(`Someone left from room id ${connectionInfo.roomId}`)
-                addChat("left:"+frame.body);
+                // addChat("left:"+frame.body);
             })
     
             //게임서버랑 통신 =>방장:게임을 시작하고, 게임설정(카테고리 설정...)
-            stompClient.subscribe(`/subscribe/system/private/${connectionInfo.roomId}`, function (frame) {
-                addChat("gameserver :"+frame.body);
+            stompClient.subscribe(`/subscribe/public/${connectionInfo.roomId}`, function (frame) {
+                console.log("subscribe host");
+                // addChat("gameserver :"+frame.body);
+            })
+
+            //에러 처리 위한 채널
+            stompClient.subscribe(`/subscribe/errors`, function (frame) {
+                console.log("subscribe errors");
+                // addChat("gameserver :"+frame.body);
             })
         })
     }
 
+    const startGame = () => {
+        if(connectionInfo.roomId && connectionInfo.ownerId)
+        {            
+            stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
+                "senderId":connectionInfo.ownerId, 
+                "message":{"method":"startGame", "body":{"round":5,"turn":2,"category":["food","sports"]}},
+                "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+            }));
+                // {"senderId":"e74c28c2-a24c-4eed-82cf-befa2f2f7db6",
+                // "message":{"method":"startGame", "body":{"round":3,"category":["food"],"turn":1}},
+                // "uuid":"cb160b0a-f587-6f10-6894-a7a0f523d30e"}
+            console.log("start game!");
+        }
+    }
+        
+
     const addChat = (message) => {
         console.log('implement addChat', message);
+    }
+
+    const sendMessage = () => {
+        const m = {"message": message,"senderId": connectionInfo.ownerId}
+        console.log("sendMessage: ", m)
+        if(connectionInfo.roomId)
+            stompClient.send(`/publish/messages/${connectionInfo.roomId}`, {}, JSON.stringify({"message": message,"senderId": connectionInfo.ownerId}));
     }
 
     const disconnect = () => {
@@ -118,6 +147,9 @@ const GameForm = ({ }) => {
         leaveTheRoom={leaveTheRoom}
         toResult={toResult}
         members={members}
+        message={message}
+        setMessage={setMessage}
+        sendMessage={sendMessage}
     />
     );
 };
