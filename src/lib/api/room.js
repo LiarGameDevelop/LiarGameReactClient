@@ -4,8 +4,8 @@ import client from './client';
 export const makeRoom = ({ maxPersonCount, roomName, ownerName }) =>
   client.post('/room', { maxPersonCount, roomName, ownerName });
 
-export const enterRoom = ({ roomId, userId }) =>
-client.post('/room/enter', { roomId, userId });
+export const enterRoom = ({ roomId, username }) =>
+client.post('/room/enter', { roomId, username });
 
 export const leaveRoom = ({ roomId, userId }) =>
 client.post('/room/leave', { roomId, userId });

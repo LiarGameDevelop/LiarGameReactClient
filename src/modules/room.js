@@ -32,9 +32,9 @@ export const deleteRoom = createAction(DELETE_ROOM_DELETE, ({ roomId, ownerId })
     ownerId,
 }));
 
-export const enterRoom = createAction(POST_ROOM_ENTER, ({ roomId, userId }) => ({
+export const enterRoom = createAction(POST_ROOM_ENTER, ({ roomId, username }) => ({
     roomId,
-    userId,
+    username,
 }));
 
 export const leaveRoom = createAction(POST_ROOM_LEAVE, ({ roomId, userId }) => ({

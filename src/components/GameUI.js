@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material';
 import { Person } from "@mui/icons-material"
 
-const GameUI = ({ startGame, leaveTheRoom, toResult, members, message, setMessage, sendMessage }) => {
+const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, message, setMessage, sendMessage, chatlog }) => {
     return (
         <main>
             <Grid container id="game-main" direction="row" alignItems="baseline"  spacing={1}>
@@ -53,7 +53,7 @@ const GameUI = ({ startGame, leaveTheRoom, toResult, members, message, setMessag
                                                 <p>게임정보</p>
                                             </Grid>
                                             <Grid item>
-                                                <Button variant="contained" onClick={()=>startGame()}>
+                                                <Button variant="contained" disabled={!isOwner} onClick={()=>startGame()}>
                                                     Start
                                                 </Button>
                                             </Grid>
@@ -89,6 +89,12 @@ const GameUI = ({ startGame, leaveTheRoom, toResult, members, message, setMessag
                                 <p id="player0">user1:하드 코딩된 대화문 시작</p>
                                 <p id="player1">user2: ㅎㅇㅎㅇ</p>
                                 <p id="player2">user3: ㅎㅇㅎㅇ</p>
+                                {chatlog}
+                                {/* {
+                                    Array.from({ length: chatlog },(_,i) => 
+                                        chatlog[i];
+                                    )
+                                } */}
                             </Grid>
                         </Grid>
                         <Grid item>
