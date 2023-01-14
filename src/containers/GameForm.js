@@ -30,7 +30,8 @@ const GameForm = ({ }) => {
 
     const [message, setMessage] = useState('');
     const [stompClient, setStompClient] = useState(null);
-    const [chatlog, setChatlog] = useState([<p>공지: Test</p>,<p>공지: ㅆㅆ</p>])
+    const [isTurn, setIsTurn] = useState(false);
+    const [chatlog, setChatlog] = useState([<p>공지: Test</p>,<p>공지: ㅆㅆ</p>]);
 
     const leaveTheRoom = () => {
         console.log("leave room with sock client")
@@ -110,16 +111,56 @@ const GameForm = ({ }) => {
     
             //게임서버랑 통신 =>방장:게임을 시작하고, 게임설정(카테고리 설정...)
             stompClient.subscribe(`/subscribe/public/${connectionInfo.roomId}`, function (frame) {
-                console.log("subscribe host", frame.body);
+                console.log("subscribe public", frame.body);
                 fbody=JSON.parse(frame.body);
-                if(connectionInfo.ownerId == connectionInfo.user.userId && fbody.message.method == "notifyGameStarted")
+                if(connectionInfo.ownerId == connectionInfo.user.userId)
                 {
-                    console.log("notifyGameStarted - start Round")
-                    stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
-                        "senderId":connectionInfo.ownerId, 
-                        "message":{"method":"startRound", "body":null},
-                        "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-                    }));                    
+                    if(fbody.message.method == "notifyGameStarted") {
+                        console.log("notifyGameStarted - start Round")
+                        stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.ownerId, 
+                            "message":{"method":"startRound", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));   
+                    }
+                    if(fbody.message.body && fbody.message.body.state == "SELECT_LIAR") {
+                        console.log("SELECT_LIAR")
+                        stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.ownerId, 
+                            "message":{"method":"selectLiar"},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));
+                    }        
+                }
+                if(fbody.message.method == "notifyTurn") {
+                    console.log("It's your turn!")
+                    setIsTurn(true);
+                }
+                else if(fbody.message.method == "notifyTurnTimeout") {
+                    console.log("Turn end!")
+                    setIsTurn(false);
+                }
+                else if(fbody.message.method == "notifyFindingLiarEnd") {
+                    console.log("finding liar end! start voting")
+                }
+                else if(fbody.message.method == "notifyVoteResult") {
+                    console.log("voting end! notify result")
+                }
+            })
+
+            stompClient.subscribe(`/subscribe/private/${connectionInfo.user.userId}`, function (frame) {
+                console.log("subscribe each client", frame.body);
+                fbody=JSON.parse(frame.body);
+                if(connectionInfo.ownerId == connectionInfo.user.userId)
+                {
+                    if(fbody.message.method == "notifyLiarSelected") {
+                        console.log("notifyLiarSelected - openKeyword")
+                        stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.ownerId, 
+                            "message":{"method":"openKeyword", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));   
+                    }     
                 }
             })
 
