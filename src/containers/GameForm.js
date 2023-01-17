@@ -30,7 +30,12 @@ const GameForm = ({ }) => {
 
     const [message, setMessage] = useState('');
     const [stompClient, setStompClient] = useState(null);
-    const [isTurn, setIsTurn] = useState(false);
+    const [phase, setPhase] = useState(0); // 0: 게임시작전, 1: 라운드 본인 턴 아님 2: 라운드 본인 턴 3: 투표 4: 투표 종료 5: 투표 결과 발표 6: 라이어 정답 맞추기 7: 게임 종료
+    const [hints,setHints] = useState(['','','','','','']);
+    const [liar, setLiar] = useState(null);
+    const [mustAnswer, setMustAnswer] = useState(false);
+    const [answer, setAnswer] = useState('');
+
     const [chatlog, setChatlog] = useState([<p>공지: Test</p>,<p>공지: ㅆㅆ</p>]);
 
     const leaveTheRoom = () => {
@@ -88,7 +93,7 @@ const GameForm = ({ }) => {
                 // let username='?'
                 // if(connectionInfo.user && connectionInfo.userList){
                 //     for(let i=0; i<connectionInfo.userList.length; ++i){
-                //         if(connectionInfo.userList[i].userId == JSON.parse(frame.body).senderId)
+                //         if(connectionInfo.userList[i].userId === JSON.parse(frame.body).senderId)
                 //         {
                 //             userIndex=i;
                 //             username=connectionInfo.userList[i].username;
@@ -113,47 +118,94 @@ const GameForm = ({ }) => {
             stompClient.subscribe(`/subscribe/public/${connectionInfo.roomId}`, function (frame) {
                 console.log("subscribe public", frame.body);
                 fbody=JSON.parse(frame.body);
-                if(connectionInfo.ownerId == connectionInfo.user.userId)
-                {
-                    if(fbody.message.method == "notifyGameStarted") {
-                        console.log("notifyGameStarted - start Round")
+                if(fbody.message.method === "notifyGameStarted") {
+                    console.log("notifyGameStarted - start Round")
+                    setPhase(1);
+                    if(connectionInfo.ownerId === connectionInfo.user.userId) {
                         stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
                             "senderId":connectionInfo.ownerId, 
                             "message":{"method":"startRound", "body":null},
                             "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-                        }));   
+                        }));  
                     }
-                    if(fbody.message.body && fbody.message.body.state == "SELECT_LIAR") {
-                        console.log("SELECT_LIAR")
+                }
+                else if(fbody.message.body && fbody.message.body.state === "SELECT_LIAR") {
+                    console.log("SELECT_LIAR")
+                    if(connectionInfo.ownerId === connectionInfo.user.userId) {
                         stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
                             "senderId":connectionInfo.ownerId, 
                             "message":{"method":"selectLiar"},
                             "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
                         }));
-                    }        
+                    }
                 }
-                if(fbody.message.method == "notifyTurn") {
-                    console.log("It's your turn!")
-                    setIsTurn(true);
+                else if(fbody.message.method === "notifyTurn") {
+                    if(fbody.message.body.turnId === connectionInfo.user.userId){
+                        console.log("It's your turn!")
+                        setPhase(2);
+                    }
                 }
-                else if(fbody.message.method == "notifyTurnTimeout") {
-                    console.log("Turn end!")
-                    setIsTurn(false);
+                else if(fbody.message.method === "notifyTurnTimeout") {
+                    console.log("turn end")
+                    setPhase(1);
                 }
-                else if(fbody.message.method == "notifyFindingLiarEnd") {
+                else if(fbody.message.method === "notifyFindingLiarEnd") {
                     console.log("finding liar end! start voting")
+                    setPhase(3);
                 }
-                else if(fbody.message.method == "notifyVoteResult") {
+                else if(fbody.message.method === "notifyVoteResult") {
                     console.log("voting end! notify result")
+                    setPhase(4);
+                    if(connectionInfo.ownerId === connectionInfo.user.userId) {
+                        stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.ownerId, 
+                            "message":{"method":"openLiar", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));
+                    }
+                }
+                else if(fbody.message.method === "notifyNewVoteNeeded") {
+                    console.log("new vote needed")
+                    setPhase(3);
+                }
+                // else if(fbody.message.method === "notifyLiarOpenRequest") {
+                //     console.log("host should request open liar")
+                // }
+                else if(fbody.message.method === "notifyLiarOpened") {
+                    console.log("notify liar opened")
+                    setPhase(5);
+                    for(let i=0; i<connectionInfo.userList.length; ++i){
+                        if(connectionInfo.userList[i].userId === fbody.message.body.liar)
+                        {
+                            setLiar(connectionInfo.userList[i].username);
+                            if(connectionInfo.user.userId === fbody.message.body.liar) {
+                                setMustAnswer(true);
+                                setPhase(6);
+                            }
+                            break;
+                        }
+                    }
+                }
+                else if(fbody.message.method === "notifyLiarAnswerNeeded") {
+                    console.log("라이어는 답을 말하라")
+
+                }
+                else if(fbody.message.method === "notifyLiarAnswerCorrect") {
+                    if(fbody.message.body.answer) {
+                        console.log("Liar is correct");
+                    }
+                    else {
+                        console.log("liar is incorrect")
+                    }
                 }
             })
 
             stompClient.subscribe(`/subscribe/private/${connectionInfo.user.userId}`, function (frame) {
                 console.log("subscribe each client", frame.body);
                 fbody=JSON.parse(frame.body);
-                if(connectionInfo.ownerId == connectionInfo.user.userId)
+                if(connectionInfo.ownerId === connectionInfo.user.userId)
                 {
-                    if(fbody.message.method == "notifyLiarSelected") {
+                    if(fbody.message.method === "notifyLiarSelected") {
                         console.log("notifyLiarSelected - openKeyword")
                         stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
                             "senderId":connectionInfo.ownerId, 
@@ -173,7 +225,7 @@ const GameForm = ({ }) => {
     }
 
     const startGame = () => {
-        if(connectionInfo.roomId && connectionInfo.ownerId == connectionInfo.user.userId)
+        if(connectionInfo.roomId && connectionInfo.ownerId === connectionInfo.user.userId)
         {            
             stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
                 "senderId":connectionInfo.ownerId, 
@@ -186,11 +238,41 @@ const GameForm = ({ }) => {
 
     const sendMessage = () => {
         const m = {"message": message,"senderId": connectionInfo.user.userId}
-        if(connectionInfo.roomId)
+        if(connectionInfo.roomId) {
             stompClient.send(`/publish/messages/${connectionInfo.roomId}`, {}, JSON.stringify(m));
             setChatlog(([...chatlog, <p id={`player${connectionInfo.user.userId}`} >{connectionInfo.user.username}: {message}</p>]))
             setMessage('');
-        
+        }
+    }
+
+    const submitHint = (hint) => { //hint 제출 API 전달받으면 본격적으로 작업
+        if(connectionInfo.roomId) {
+            console.log("submit Hint", hint);
+            const tmp = [...hints];
+            tmp[0] = hint;
+            setHints(tmp);
+        }
+    }
+
+    const sendVote = (index) => {
+        if(connectionInfo.roomId && connectionInfo.userList) {
+            stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
+                "senderId":connectionInfo.user.userId, 
+                "message":{"method":"voteLiar", "body": {"liar": connectionInfo.userList[index].userId}},
+                "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+            }));  
+        }
+    }
+
+    const submitAnswer = () => {
+        if(connectionInfo.roomId) {
+            stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
+                "senderId":connectionInfo.user.userId, 
+                "message":{"method":"checkKeywordCorrect", "body": {"keyword": answer}},
+                "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+            }));  
+        }
+        setMustAnswer(false);
     }
 
     const disconnect = () => {
@@ -202,11 +284,20 @@ const GameForm = ({ }) => {
 
     return (
     <Game
-        isOwner={connectionInfo && connectionInfo.ownerId == connectionInfo.user.userId}
+        isOwner={connectionInfo && connectionInfo.ownerId === connectionInfo.user.userId}
         startGame={startGame}
         leaveTheRoom={leaveTheRoom}
         toResult={toResult}
         members={members}
+        phase={phase}
+        hints={hints}
+        submitHint={submitHint}
+        sendVote={sendVote}
+        liar={liar}
+        mustAnswer={mustAnswer}
+        answer={answer}
+        setAnswer={setAnswer}
+        submitAnswer={submitAnswer}
         message={message}
         setMessage={setMessage}
         sendMessage={sendMessage}
