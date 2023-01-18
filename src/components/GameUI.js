@@ -4,14 +4,14 @@ import { Person } from '@mui/icons-material'
 import InputModal from './common/InputModal'
 
 const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, hints, submitHint, sendVote, 
-    liar, mustAnswer, answer, setAnswer, submitAnswer,
+    liar, mustAnswer, answer, setAnswer, submitAnswer, fuse,
     message, setMessage, sendMessage, chatlog 
 }) => {
     let notice;
     switch(phase) {
         case 0: notice = "게임 시작 전 대기"; break;
         case 1: notice = "라운드 진행 중"; break;
-        case 2: notice = "힌트를 입력해주세요"; break;
+        case 2: notice = "채팅창에 힌트를 입력해주세요"; break;
         case 3: notice = "라이어를 지목해주세요. 라이어의 아이콘을 클릭"; break;
         case 4: notice = "투표가 종료되었습니다"; break;
         case 5: notice = `${liar}님이 라이어로 지목되었습니다.`;
@@ -92,7 +92,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, hi
                                                     <p>{notice}</p>
                                                 </Grid>
                                                 <Grid item>
-                                                    <CircularProgress variant="determinate" value={75}/>
+                                                    <CircularProgress variant="determinate" value={fuse}/>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
@@ -173,13 +173,13 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, hi
                     </Grid>
                 </Grid>
             </main>
-            <InputModal
+            {/* <InputModal
                 open={phase==2}
                 message="키워드는 ---. 힌트를 주세요(구현 중)."
                 value={hints[0]}
                 handleInput={()=>console.log("must implement")}
                 submit={submitHint}
-            />
+            /> */}
             <InputModal
                 open={mustAnswer}
                 message="라이어로 지목되었습니다. 정답을 맞춰주세요."

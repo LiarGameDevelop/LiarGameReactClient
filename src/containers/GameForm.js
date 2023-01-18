@@ -31,12 +31,28 @@ const GameForm = ({ }) => {
     const [message, setMessage] = useState('');
     const [stompClient, setStompClient] = useState(null);
     const [phase, setPhase] = useState(0); // 0: 게임시작전, 1: 라운드 본인 턴 아님 2: 라운드 본인 턴 3: 투표 4: 투표 종료 5: 투표 결과 발표 6: 라이어 정답 맞추기 7: 게임 종료
-    const [hints,setHints] = useState(['','','','','','']);
+    const [hints,setHints] = useState(['','','','','','']); //유저 별 힌트
     const [liar, setLiar] = useState(null);
-    const [mustAnswer, setMustAnswer] = useState(false);
-    const [answer, setAnswer] = useState('');
-
+    const [mustAnswer, setMustAnswer] = useState(false); //라이어가 걸렸으면 정답 입력해야함
+    const [answer, setAnswer] = useState(''); //라이어 입력 정답
+    const [fuse, setFuse] = useState(0); //힌트, 투표, 정답 입력용 타이머
     const [chatlog, setChatlog] = useState([<p>공지: Test</p>,<p>공지: ㅆㅆ</p>]);
+
+    useEffect(() => {
+        if(phase===2 || phase===3 || phase===6) {
+            const timer = setInterval(() => {
+                console.log("fuse ", fuse)
+                setFuse((prevFuse) => {
+                    if(prevFuse === 100) {
+                        console.log("time up")
+                        clearInterval(timer);
+                        return 0;
+                    }
+                    return (prevFuse + 1);
+                })
+            }, 200);
+        }
+    },[phase]);
 
     const leaveTheRoom = () => {
         console.log("leave room with sock client")
@@ -298,6 +314,7 @@ const GameForm = ({ }) => {
         answer={answer}
         setAnswer={setAnswer}
         submitAnswer={submitAnswer}
+        fuse={fuse}
         message={message}
         setMessage={setMessage}
         sendMessage={sendMessage}
