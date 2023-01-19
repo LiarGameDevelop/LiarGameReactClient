@@ -1,8 +1,9 @@
 import React from 'react';
 import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material';
-import { Person } from '@mui/icons-material'
+import {Dog1, Dog2, Dog3, Dog4, Dog5, Dog6} from '../assets/image'
 import InputModal from './common/InputModal'
 
+const PlayerIcon = [<Dog1 />, <Dog2 />, <Dog3 />, <Dog4 />, <Dog5 />, <Dog6 />];
 const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, hints, submitHint, sendVote, 
     liar, mustAnswer, answer, setAnswer, submitAnswer, fuse,
     message, setMessage, sendMessage, chatlog 
@@ -30,8 +31,8 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, hi
                                         <Grid container direction="column">
                                             <Grid item>
                                                 <Grid container direction="row" justifyContent="space-around" alignItems="center">
-                                                    <Grid item>
-                                                        <Person id={`player${2*i}`} fontSize='large' onClick={()=>sendVote(2*i)} />
+                                                    <Grid item onClick={()=>sendVote(2*i)}>
+                                                        {PlayerIcon[2*i]}
                                                     </Grid>
                                                     <Grid item>
                                                         <Paper>
@@ -144,8 +145,8 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, hi
                                         <Grid container direction="column">
                                             <Grid item>
                                                 <Grid container direction="row" justifyContent="space-around" alignItems="center">
-                                                    <Grid item>
-                                                        <Person id={`player${2*i + 1}`} fontSize='large' onClick={()=>sendVote(2*i + 1)} />
+                                                    <Grid item onClick={()=>sendVote(2*i + 1)}>
+                                                        {PlayerIcon[2*i + 1]}
                                                     </Grid>
                                                     <Grid item>
                                                         <Paper>

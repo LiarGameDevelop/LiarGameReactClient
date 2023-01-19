@@ -1,0 +1,6 @@
+export { ReactComponent as Dog1 } from './dog1.svg'
+export { ReactComponent as Dog2 } from './dog2.svg'
+export { ReactComponent as Dog3 } from './dog3.svg'
+export { ReactComponent as Dog4 } from './dog4.svg'
+export { ReactComponent as Dog5 } from './dog5.svg'
+export { ReactComponent as Dog6 } from './dog6.svg'
