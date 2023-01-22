@@ -1,11 +1,12 @@
 import React from 'react';
 import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material';
-import {Dog1, Dog2, Dog3, Dog4, Dog5, Dog6} from '../assets/image'
+import { Dog1, Dog2, Dog3, Dog4, Dog5, Dog6, Cat } from '../assets/image'
 import InputModal from './common/InputModal'
 
-const PlayerIcon = [<Dog1 />, <Dog2 />, <Dog3 />, <Dog4 />, <Dog5 />, <Dog6 />];
-const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, hints, submitHint, sendVote, 
-    liar, mustAnswer, answer, setAnswer, submitAnswer, fuse,
+const PlayerIcon = [<Dog1 />, <Dog2 />, <Dog3 />, <Dog4 />, <Dog5 />, <Dog6 />, <Cat />];
+const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, 
+    category, keyword, round, turn,// hints, submitHint, 
+    sendVote, liar, mustAnswer, answer, setAnswer, submitAnswer, fuse,
     message, setMessage, sendMessage, chatlog 
 }) => {
     let notice;
@@ -66,7 +67,9 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, hi
                                         <Grid item>
                                             <Grid container direction="row" alignItems="center" justifyContent="space-between">
                                                 <Grid item>
-                                                    <p>게임정보</p>
+                                                    <p>
+                                                        게임정보 {round>0 && `라운드 ${round} / 턴 ${turn} / 키워드 ${keyword}`}
+                                                    </p>
                                                 </Grid>
                                                 <Grid item>
                                                     <Button variant="contained" disabled={!isOwner} onClick={()=>startGame()}>
@@ -102,10 +105,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, hi
                             </Grid>
                             <Grid item>
                                 <Grid id="texting-area" container direction="column">
-                                    <p id="player0">user1:하드 코딩된 대화문 시작</p>
-                                    <p id="player1">user2: ㅎㅇㅎㅇ</p>
-                                    <p id="player2">user3: ㅎㅇㅎㅇ</p>
-                                    {chatlog}
+                                    <Grid item>{chatlog}</Grid>   
                                 </Grid>
                             </Grid>
                             <Grid item>

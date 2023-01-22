@@ -46,6 +46,8 @@ div#game-info {
 div#texting-area {
   background-color: aliceblue;
   padding-inline-start: 10px;
+  height: 400px;
+  overflow-y: scroll;
 }
 
 div#result-main {
