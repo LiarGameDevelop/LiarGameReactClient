@@ -21,6 +21,10 @@ const [POST_ROOM_LEAVE, POST_ROOM_LEAVE_SUCCESS, POST_ROOM_LEAVE_FAILURE] = crea
     'room/LEAVE'
 );
 
+const [GET_ROOM, GET_ROOM_SUCCESS, GET_ROOM_FAILURE] = createRequestActionTypes(
+    'room/GET'
+);
+
 export const makeRoom = createAction(POST_ROOM_MAKE, ({ maxPersonCount, roomName, ownerName }) => ({
     maxPersonCount,
     roomName,
@@ -42,17 +46,23 @@ export const leaveRoom = createAction(POST_ROOM_LEAVE, ({ roomId, userId }) => (
     userId,
 }));
 
+export const getRoom = createAction(GET_ROOM, ({ roomId }) => ({
+    roomId,
+}));
+
 // saga
 const makeRoomSaga = createRequestSaga(POST_ROOM_MAKE, roomAPI.makeRoom);
 const deleteRoomSaga = createRequestSaga(DELETE_ROOM_DELETE, roomAPI.deleteRoom);
 const enterRoomSaga = createRequestSaga(POST_ROOM_ENTER, roomAPI.enterRoom);
 const leaveRoomSaga = createRequestSaga(POST_ROOM_LEAVE, roomAPI.leaveRoom);
+const getRoomSaga = createRequestSaga(GET_ROOM, roomAPI.getRoom);
 
 export function* roomSaga() {
     yield takeLatest(POST_ROOM_MAKE, makeRoomSaga);
     yield takeLatest(DELETE_ROOM_DELETE, deleteRoomSaga);
     yield takeLatest(POST_ROOM_ENTER, enterRoomSaga);
     yield takeLatest(POST_ROOM_LEAVE, leaveRoomSaga);
+    yield takeLatest(GET_ROOM, getRoomSaga);
 }
 
 const initialState = {
@@ -95,6 +105,15 @@ const room = handleActions(
             error: null,
         }),
         [POST_ROOM_LEAVE_FAILURE]: (state, { payload: error }) => ({
+            ...state,
+            error,
+        }),
+        [GET_ROOM_SUCCESS]: (state, { payload: connection_info }) =>({
+            ...state,
+            connectionInfo: connection_info,
+            error: null,
+        }),
+        [GET_ROOM_FAILURE]: (state, { payload: error }) => ({
             ...state,
             error,
         }),

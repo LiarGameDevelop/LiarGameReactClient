@@ -14,4 +14,4 @@ export const deleteRoom = ({ roomId, ownerId }) =>
 client.delete('/room', { roomId, ownerId });
 
 export const getRoom = ({roomId}) =>
-client.get(`/room/${roomId}`);
+client.get(`/room?roomId=${roomId}`);
