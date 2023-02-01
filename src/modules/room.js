@@ -9,45 +9,49 @@ const [POST_ROOM_MAKE, POST_ROOM_MAKE_SUCCESS, POST_ROOM_MAKE_FAILURE] = createR
     'room/MAKE'
 );
 
-const [DELETE_ROOM_DELETE, DELETE_ROOM_DELETE_SUCCESS, DELETE_ROOM_DELETE_FAILURE] = createRequestActionTypes(
-    'room/DELETE'
-);
-
 const [POST_ROOM_ENTER, POST_ROOM_ENTER_SUCCESS, POST_ROOM_ENTER_FAILURE] = createRequestActionTypes(
     'room/ENTER'
-);
-
-const [POST_ROOM_LEAVE, POST_ROOM_LEAVE_SUCCESS, POST_ROOM_LEAVE_FAILURE] = createRequestActionTypes(
-    'room/LEAVE'
 );
 
 const [GET_ROOM, GET_ROOM_SUCCESS, GET_ROOM_FAILURE] = createRequestActionTypes(
     'room/GET'
 );
 
-export const makeRoom = createAction(POST_ROOM_MAKE, ({ maxPersonCount, roomName, ownerName }) => ({
+const [POST_ROOM_LEAVE, POST_ROOM_LEAVE_SUCCESS, POST_ROOM_LEAVE_FAILURE] = createRequestActionTypes(
+    'room/LEAVE'
+);
+
+const [DELETE_ROOM_DELETE, DELETE_ROOM_DELETE_SUCCESS, DELETE_ROOM_DELETE_FAILURE] = createRequestActionTypes(
+    'room/DELETE'
+);
+
+export const makeRoom = createAction(POST_ROOM_MAKE, ({ maxPersonCount, ownerName, password }) => ({
     maxPersonCount,
-    roomName,
     ownerName,
+    password,
 }));
 
-export const deleteRoom = createAction(DELETE_ROOM_DELETE, ({ roomId, ownerId }) => ({
-    roomId,
-    ownerId,
-}));
-
-export const enterRoom = createAction(POST_ROOM_ENTER, ({ roomId, username }) => ({
+export const enterRoom = createAction(POST_ROOM_ENTER, ({ roomId, username, password }) => ({
     roomId,
     username,
+    password,
 }));
 
-export const leaveRoom = createAction(POST_ROOM_LEAVE, ({ roomId, userId }) => ({
+export const getRoom = createAction(GET_ROOM, ({ roomId, token }) => ({
+    roomId,
+    token,
+}));
+
+export const leaveRoom = createAction(POST_ROOM_LEAVE, ({ roomId, userId, token }) => ({
     roomId,
     userId,
+    token,
 }));
 
-export const getRoom = createAction(GET_ROOM, ({ roomId }) => ({
+export const deleteRoom = createAction(DELETE_ROOM_DELETE, ({ roomId, ownerId, token }) => ({
     roomId,
+    ownerId,
+    token,
 }));
 
 // saga
@@ -67,6 +71,7 @@ export function* roomSaga() {
 
 const initialState = {
     connectionInfo: null,
+    users: null,
 };
 
 
@@ -108,11 +113,14 @@ const room = handleActions(
             ...state,
             error,
         }),
-        [GET_ROOM_SUCCESS]: (state, { payload: connection_info }) =>({
-            ...state,
-            connectionInfo: connection_info,
-            error: null,
-        }),
+        [GET_ROOM_SUCCESS]: (state, { payload: connection_info }) => {
+            state.connectionInfo.users = connection_info.users
+            return {
+                ...state,
+                connectionInfo: state.connectionInfo,
+                error: null,
+            }
+        },
         [GET_ROOM_FAILURE]: (state, { payload: error }) => ({
             ...state,
             error,

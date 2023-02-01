@@ -16,7 +16,7 @@ const HomeForm = ({ }) => {
         navigate("/game");
         console.log("create game: ", connectionInfo);
         dispatch(makeRoom(
-            { "maxPersonCount": 5, "roomName": "front-room!", "ownerName": nickname}
+            { "maxPersonCount": 5, "ownerName": nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}
         ));
     }
 

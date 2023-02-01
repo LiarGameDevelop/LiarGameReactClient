@@ -1,17 +1,17 @@
 import client from './client';
 
 // 방 생성
-export const makeRoom = ({ maxPersonCount, roomName, ownerName }) =>
-  client.post('/room', { maxPersonCount, roomName, ownerName });
+export const makeRoom = ({ maxPersonCount, ownerName, password }) =>
+  client.post('/room/create', { maxPersonCount, ownerName, password });
 
-export const enterRoom = ({ roomId, username }) =>
-client.post('/room/enter', { roomId, username });
+export const enterRoom = ({ roomId, username, password }) =>
+client.post('/room/enter', { roomId, username, password });
 
-export const leaveRoom = ({ roomId, userId }) =>
-client.post('/room/leave', { roomId, userId });
+export const getRoom = ({roomId, token}) =>
+client.get(`/room/info?roomId=${roomId}`, {headers: { 'Authorization': `Bearer ${token}` }});
 
-export const deleteRoom = ({ roomId, ownerId }) =>
-client.delete('/room', { roomId, ownerId });
+export const leaveRoom = ({ roomId, userId, token }) =>
+client.post('/room/leave', { roomId, userId }, {headers: { 'Authorization': `Bearer ${token}` }});
 
-export const getRoom = ({roomId}) =>
-client.get(`/room?roomId=${roomId}`);
+export const deleteRoom = ({ roomId, ownerId, token }) =>
+client.delete('/room', { roomId, ownerId }, {headers: { 'Authorization': `Bearer ${token}` }});

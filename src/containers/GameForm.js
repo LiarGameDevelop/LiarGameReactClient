@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { leaveRoom } from '../modules/room'
+import { getRoom, leaveRoom } from '../modules/room'
 
 //TODO: Socket 관련 코드는 별도 store로 옮기는걸로 장기적으로.
 import SockJS from 'sockjs-client';
@@ -22,9 +22,13 @@ const GameForm = ({ }) => {
 
     useEffect(() => {
         console.log("connection info change ", connectionInfo);
-        if(connectionInfo) {
+        if(connectionInfo && connectionInfo.users) {
             console.log("start connectStomp", connectionInfo);
-            connect(); //socket connect
+            // connect(); //socket connect
+        }
+        else if(connectionInfo) {
+            dispatch(getRoom({ "roomId": connectionInfo.room.roomId, "token": connectionInfo.token.accessToken }));
+            connect();
         }
     }, [connectionInfo]);
 
@@ -40,7 +44,7 @@ const GameForm = ({ }) => {
     const [mustAnswer, setMustAnswer] = useState(false); //라이어가 걸렸으면 정답 입력해야함
     const [answer, setAnswer] = useState(''); //라이어 입력 정답
     const [fuse, setFuse] = useState(0); //힌트, 투표, 정답 입력용 타이머
-    const [chatlog, setChatlog] = useState([<p>공지: Test</p>,<p>공지: ㅆㅆ</p>]);
+    const [chatlog, setChatlog] = useState([]);
 
     useEffect(() => {
         if(phase===2 || phase===3 || phase===6) {
@@ -58,30 +62,24 @@ const GameForm = ({ }) => {
         }
     },[phase]);
 
-    useEffect(() => {
-        return () => {
-            console.log("cleanup")
-            if(connectionInfo) {
-                console.log("should handle leave room", connectionInfo.roomId, connectionInfo.senderId);
-                dispatch(leaveRoom({ "roomId": connectionInfo.roomId, "userId": "so" }));
-            }
-            if(stompClient) {
-                console.log("should disconnect socket");
-                disconnect();
-            }
-        }
-    },[])
-
     const leaveTheRoom = () => {
         console.log("leave room")
         navigate("/");
+        if(connectionInfo) {
+            console.log("should handle leave room");
+            dispatch(leaveRoom({ "roomId": connectionInfo.room.roomId, "userId": connectionInfo.user.userId, "token": connectionInfo.token.accessToken }));
+        }
+        if(stompClient) {
+            console.log("should disconnect socket");
+            disconnect();
+        }
     }
 
     const toResult = () => {
         console.log("leave room with sock client")
         if(connectionInfo) {
-            console.log("should handle leave room", connectionInfo.roomId, connectionInfo.senderId);
-            // dispatch(deleteRoom({"roomId": connectionInfo.roomId, "ownerId": connectionInfo.senderId}));
+            console.log("should handle leave room", connectionInfo.room.roomId, connectionInfo.senderId);
+            // dispatch(deleteRoom({"roomId": connectionInfo.room.roomId, "room.ownerId": connectionInfo.senderId}));
         }
         if(stompClient) {
             console.log("should disconnect socket");
@@ -103,16 +101,16 @@ const GameForm = ({ }) => {
 
         console.log("try connect",connectionInfo);
 
-        stompClient.connect({"username":connectionInfo.userList[0].username,"roomId":connectionInfo.roomId}, function (frame) {
+        stompClient.connect({"username":connectionInfo.user.username,"roomId":connectionInfo.room.roomId, "token": connectionInfo.token.accessToken}, function (frame) {
             // setConnected(true)
             console.log('Connected: ' + frame)
     
-            console.info('_gconnectionInfo room id: ' + connectionInfo.roomId)
+            console.info('_gconnectionInfo room id: ' + connectionInfo.room.roomId)
 
             let fbody; // frame JSON으로 처리할 변수
     
             setInterval(()=>{
-                stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
+                stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
                     "senderId":connectionInfo.user.userId, 
                     "message":{"method":"getGameState"},
                     "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
@@ -120,45 +118,45 @@ const GameForm = ({ }) => {
             }, 60000);
 
             //클라이언트끼리 대화
-            stompClient.subscribe(`/subscribe/room/${connectionInfo.roomId}/chat`, function (frame) {
+            stompClient.subscribe(`/subscribe/room/${connectionInfo.room.roomId}/chat`, function (frame) {
                 console.log("subscribe chat", frame.body);
                 // ToDo: 채팅 처리 연구. connect할 때의 chatlog 값을 기준으로 갱신이 되는 문제.
                 let userIndex = -1;
                 let username='?'
-                if(connectionInfo.user && connectionInfo.userList){
-                    for(let i=0; i<connectionInfo.userList.length; ++i){
-                        if(connectionInfo.userList[i].userId === JSON.parse(frame.body).senderId)
-                        {
-                            userIndex=i;
-                            username=connectionInfo.userList[i].username;
-                            break;
-                        }
-                    }
-                }
+                // if(connectionInfo.user && connectionInfo.users){
+                //     for(let i=0; i<connectionInfo.users.length; ++i){
+                //         if(connectionInfo.users[i].userId === JSON.parse(frame.body).senderId)
+                //         {
+                //             userIndex=i;
+                //             username=connectionInfo.users[i].username;
+                //             break;
+                //         }
+                //     }
+                // }
                 setChatlog((prevLog)=>([...prevLog, <p id={`player${userIndex}`}>{username}: {JSON.parse(frame.body).message}</p>]))
             })
     
             //사람 들어온것 =>웹소켓, STOMP 연결하면 자동으로 날라오는것.
-            stompClient.subscribe(`/subscribe/room.login/${connectionInfo.roomId}`, function (frame) {
-                console.info(`Someone entered in room id ${connectionInfo.roomId}`)
+            stompClient.subscribe(`/subscribe/room.login/${connectionInfo.room.roomId}`, function (frame) {
+                console.info(`Someone entered in room id ${connectionInfo.room.roomId}`)
             })
     
             //사람 나간것
-            stompClient.subscribe(`/subscribe/room.logout/${connectionInfo.roomId}`, function (frame) {
-                console.info(`Someone left from room id ${connectionInfo.roomId}`)
+            stompClient.subscribe(`/subscribe/room.logout/${connectionInfo.room.roomId}`, function (frame) {
+                console.info(`Someone left from room id ${connectionInfo.room.roomId}`)
             })
     
             //게임서버랑 통신 =>방장:게임을 시작하고, 게임설정(카테고리 설정...)
-            stompClient.subscribe(`/subscribe/public/${connectionInfo.roomId}`, function (frame) {
+            stompClient.subscribe(`/subscribe/public/${connectionInfo.room.roomId}`, function (frame) {
                 console.log("subscribe public", frame.body);
                 fbody=JSON.parse(frame.body);
                 
                 if(fbody.message.method === "notifyGameStarted") {
                     console.log("notifyGameStarted - start Round")
                     setPhase(1);
-                    if(connectionInfo.ownerId === connectionInfo.user.userId) {
-                        stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
-                            "senderId":connectionInfo.ownerId, 
+                    if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                        stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
                             "message":{"method":"startRound", "body":null},
                             "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
                         }));  
@@ -170,9 +168,9 @@ const GameForm = ({ }) => {
                 }
                 else if(fbody.message.body && fbody.message.body.state === "SELECT_LIAR") {
                     console.log("SELECT_LIAR")
-                    if(connectionInfo.ownerId === connectionInfo.user.userId) {
-                        stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
-                            "senderId":connectionInfo.ownerId, 
+                    if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                        stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
                             "message":{"method":"selectLiar"},
                             "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
                         }));
@@ -196,9 +194,9 @@ const GameForm = ({ }) => {
                 else if(fbody.message.method === "notifyVoteResult") {
                     console.log("voting end! notify result")
                     setPhase(4);
-                    if(connectionInfo.ownerId === connectionInfo.user.userId) {
-                        stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
-                            "senderId":connectionInfo.ownerId, 
+                    if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                        stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
                             "message":{"method":"openLiar", "body":null},
                             "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
                         }));
@@ -211,17 +209,17 @@ const GameForm = ({ }) => {
                 else if(fbody.message.method === "notifyLiarOpened") {
                     console.log("notify liar opened")
                     setPhase(5);
-                    for(let i=0; i<connectionInfo.userList.length; ++i){
-                        if(connectionInfo.userList[i].userId === fbody.message.body.liar)
-                        {
-                            setLiar(connectionInfo.userList[i].username);
-                            if(connectionInfo.user.userId === fbody.message.body.liar) {
-                                setMustAnswer(true);
-                                setPhase(6);
-                            }
-                            break;
-                        }
-                    }
+                    // for(let i=0; i<connectionInfo.users.length; ++i){
+                    //     if(connectionInfo.users[i].userId === fbody.message.body.liar)
+                    //     {
+                    //         setLiar(connectionInfo.users[i].username);
+                    //         if(connectionInfo.user.userId === fbody.message.body.liar) {
+                    //             setMustAnswer(true);
+                    //             setPhase(6);
+                    //         }
+                    //         break;
+                    //     }
+                    // }
                 }
                 else if(fbody.message.method === "notifyLiarAnswerNeeded") {
                     console.log("라이어는 답을 말하라")
@@ -242,10 +240,10 @@ const GameForm = ({ }) => {
                 fbody=JSON.parse(frame.body);
                 if(fbody.message.method === "notifyLiarSelected")
                 {
-                    if(connectionInfo.ownerId === connectionInfo.user.userId) {
+                    if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
                         console.log("notifyLiarSelected - openKeyword")
-                        stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
-                            "senderId":connectionInfo.ownerId, 
+                        stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
                             "message":{"method":"openKeyword", "body":null},
                             "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
                         }));   
@@ -273,10 +271,10 @@ const GameForm = ({ }) => {
     }
 
     const startGame = () => {
-        if(connectionInfo.roomId && connectionInfo.ownerId === connectionInfo.user.userId)
+        if(connectionInfo.room.roomId && connectionInfo.room.ownerId === connectionInfo.user.userId)
         {            
-            stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
-                "senderId":connectionInfo.ownerId, 
+            stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                "senderId":connectionInfo.room.ownerId, 
                 "message":{"method":"startGame", "body":{"round":5,"turn":2,"category":["food","sports"]}},
                 "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
             }));
@@ -286,14 +284,14 @@ const GameForm = ({ }) => {
 
     const sendMessage = () => {
         const m = {"message": message,"senderId": connectionInfo.user.userId}
-        if(connectionInfo.roomId) {
-            stompClient.send(`/publish/messages/${connectionInfo.roomId}`, {}, JSON.stringify(m));
+        if(connectionInfo.room.roomId) {
+            stompClient.send(`/publish/messages/${connectionInfo.room.roomId}`, {}, JSON.stringify(m));
             setMessage('');
         }
     }
 
     // const submitHint = (hint) => { //hint 제출 API 전달받으면 본격적으로 작업
-    //     if(connectionInfo.roomId) {
+    //     if(connectionInfo.room.roomId) {
     //         console.log("submit Hint", hint);
     //         const tmp = [...hints];
     //         tmp[0] = hint;
@@ -302,18 +300,18 @@ const GameForm = ({ }) => {
     // }
 
     const sendVote = (index) => {
-        if(connectionInfo.roomId && connectionInfo.userList) {
-            stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
+        if(connectionInfo.room.roomId && connectionInfo.users) {
+            stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
                 "senderId":connectionInfo.user.userId, 
-                "message":{"method":"voteLiar", "body": {"liar": connectionInfo.userList[index].userId}},
+                "message":{"method":"voteLiar", "body": {"liar": connectionInfo.users[index].userId}},
                 "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
             }));  
         }
     }
 
     const submitAnswer = () => {
-        if(connectionInfo.roomId) {
-            stompClient.send(`/publish/private/${connectionInfo.roomId}`, {}, JSON.stringify({
+        if(connectionInfo.room.roomId) {
+            stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
                 "senderId":connectionInfo.user.userId, 
                 "message":{"method":"checkKeywordCorrect", "body": {"keyword": answer}},
                 "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
@@ -331,7 +329,7 @@ const GameForm = ({ }) => {
 
     return (
     <Game
-        isOwner={connectionInfo && connectionInfo.ownerId === connectionInfo.user.userId}
+        isOwner={connectionInfo && connectionInfo.room.ownerId === connectionInfo.user.userId}
         startGame={startGame}
         leaveTheRoom={leaveTheRoom}
         toResult={toResult}
