@@ -101,7 +101,7 @@ const GameForm = ({ }) => {
 
         console.log("try connect",connectionInfo);
 
-        stompClient.connect({"username":connectionInfo.user.username,"roomId":connectionInfo.room.roomId, "token": connectionInfo.token.accessToken}, function (frame) {
+        stompClient.connect({"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`}, function (frame) {
             // setConnected(true)
             console.log('Connected: ' + frame)
     
@@ -120,7 +120,6 @@ const GameForm = ({ }) => {
             //클라이언트끼리 대화
             stompClient.subscribe(`/subscribe/room/${connectionInfo.room.roomId}/chat`, function (frame) {
                 console.log("subscribe chat", frame.body);
-                // ToDo: 채팅 처리 연구. connect할 때의 chatlog 값을 기준으로 갱신이 되는 문제.
                 let userIndex = -1;
                 let username='?'
                 // if(connectionInfo.user && connectionInfo.users){
@@ -134,17 +133,17 @@ const GameForm = ({ }) => {
                 //     }
                 // }
                 setChatlog((prevLog)=>([...prevLog, <p id={`player${userIndex}`}>{username}: {JSON.parse(frame.body).message}</p>]))
-            })
+            }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
     
             //사람 들어온것 =>웹소켓, STOMP 연결하면 자동으로 날라오는것.
             stompClient.subscribe(`/subscribe/room.login/${connectionInfo.room.roomId}`, function (frame) {
                 console.info(`Someone entered in room id ${connectionInfo.room.roomId}`)
-            })
+            }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
     
             //사람 나간것
             stompClient.subscribe(`/subscribe/room.logout/${connectionInfo.room.roomId}`, function (frame) {
                 console.info(`Someone left from room id ${connectionInfo.room.roomId}`)
-            })
+            }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
     
             //게임서버랑 통신 =>방장:게임을 시작하고, 게임설정(카테고리 설정...)
             stompClient.subscribe(`/subscribe/public/${connectionInfo.room.roomId}`, function (frame) {
@@ -233,7 +232,7 @@ const GameForm = ({ }) => {
                         console.log("liar is incorrect")
                     }
                 }
-            })
+            }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
             stompClient.subscribe(`/subscribe/private/${connectionInfo.user.userId}`, function (frame) {
                 console.log("subscribe each client", frame.body);
@@ -260,12 +259,12 @@ const GameForm = ({ }) => {
                 else if(fbody.message.method === "notifyGameState") {
                     console.log("notifyGameState", fbody)
                 }
-            })
+            }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
             //에러 처리 위한 채널
             stompClient.subscribe(`/subscribe/errors`, function (frame) {
                 console.log("subscribe errors",frame.body);
-            })
+            }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
         })
         setStompClient(stompClient);
     }

@@ -24,7 +24,7 @@ const HomeForm = ({ }) => {
         navigate("/game");
         console.log("enter game: ", connectionInfo);
         dispatch(enterRoom(
-            { "roomId": roomCode, "username": nickname}
+            { "roomId": roomCode, "username": nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}
         ));
     }
 
