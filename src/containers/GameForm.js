@@ -160,17 +160,15 @@ const GameForm = ({ }) => {
                 }
                 else if(fbody.message.method === "notifyRoundStarted") {
                     console.log("notifyRoundStarted - start Round")
-                    setRound((prevRound) => prevRound + 1);
-                }
-                else if(fbody.message.body && fbody.message.body.state === "SELECT_LIAR") {
-                    console.log("SELECT_LIAR")
-                    if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                    if(round===0 && connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                        console.log("SELECT_LIAR")
                         stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
                             "senderId":connectionInfo.room.ownerId, 
                             "message":{"method":"selectLiar"},
                             "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
                         }));
                     }
+                    setRound((prevRound) => prevRound + 1);
                 }
                 else if(fbody.message.method === "notifyTurn") {
                     setTurn(fbody.message.body.turnId);
