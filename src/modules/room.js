@@ -71,7 +71,6 @@ export function* roomSaga() {
 
 const initialState = {
     connectionInfo: null,
-    users: null,
 };
 
 
@@ -114,7 +113,7 @@ const room = handleActions(
             error,
         }),
         [GET_ROOM_SUCCESS]: (state, { payload: connection_info }) => {
-            state.connectionInfo.users = connection_info.users
+            state.connectionInfo.userList = connection_info.userList
             return {
                 ...state,
                 connectionInfo: state.connectionInfo,

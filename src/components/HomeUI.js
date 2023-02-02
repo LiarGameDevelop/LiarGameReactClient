@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Grid, TextField } from '@mui/material';
 import CreateRoomModal from './common/CreateRoomModal'
 import HelpModal from './common/HelpModal';
+import { Cat } from '../assets/image'
 
 const HomeUI = ({
     createNew, setCreateNew, createRoom, enterExisting, 
@@ -12,6 +13,9 @@ const HomeUI = ({
         <React.Fragment>
             <main>
                 <Grid id="home-main" container flexDirection="column" spacing={1}>
+                    <Grid item>
+                        <Cat />
+                    </Grid>
                     <Grid item>
                         <Button variant="contained" onClick={()=>setOpenHelp(true)}>
                             게임 방법
