@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { getRoom, leaveRoom } from '../modules/room'
+import { getRoom, leaveRoom, deleteRoom } from '../modules/room'
 
 //TODO: Socket 관련 코드는 별도 store로 옮기는걸로 장기적으로.
 import SockJS from 'sockjs-client';
@@ -15,10 +15,8 @@ const GameForm = ({ }) => {
       return { connectionInfo: room.connectionInfo }
     });
 
-    const roomNo = useParams().roomNo; //아마 안쓰일듯
+    // const roomNo = useParams().roomNo; //아마 안쓰일듯
     const navigate = useNavigate();
-
-    const members = ["철수", "영희", "민수", "Jhon", "kevu", "mike" ]; //향후 server에서 받아올듯
 
     useEffect(() => {
         console.log("connection info change ", connectionInfo);
@@ -63,6 +61,7 @@ const GameForm = ({ }) => {
         if(connectionInfo) {
             console.log("should handle leave room");
             dispatch(leaveRoom({ "roomId": connectionInfo.room.roomId, "userId": connectionInfo.user.userId, "token": connectionInfo.token.accessToken }));
+            // dispatch(deleteRoom({"roomId": connectionInfo.room.roomId, "room.ownerId": connectionInfo.senderId}));
         }
         if(stompClient) {
             console.log("should disconnect socket");
@@ -115,19 +114,11 @@ const GameForm = ({ }) => {
             //클라이언트끼리 대화
             stompClient.subscribe(`/subscribe/room/${connectionInfo.room.roomId}/chat`, function (frame) {
                 console.log("subscribe chat", frame.body);
-                let userIndex = -1;
-                let username='?'
+                let userIdx = -1;
                 if(connectionInfo.user && connectionInfo.userList){
-                    for(let i=0; i<connectionInfo.userList.length; ++i){
-                        if(connectionInfo.userList[i].userId === JSON.parse(frame.body).senderId)
-                        {
-                            userIndex=i;
-                            username=connectionInfo.userList[i].username;
-                            break;
-                        }
-                    }
+                    userIdx = connectionInfo.userList.findIndex((e)=>e.userId === JSON.parse(frame.body).senderId)
                 }
-                setChatlog((prevLog)=>([...prevLog, <p id={`player${userIndex}`}>{username}: {JSON.parse(frame.body).message}</p>]))
+                setChatlog((prevLog)=>([...prevLog, <p key={Date.now()} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>]))
             }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
     
             //사람 들어온것 =>웹소켓, STOMP 연결하면 자동으로 날라오는것.
@@ -171,7 +162,7 @@ const GameForm = ({ }) => {
                     setRound((prevRound) => prevRound + 1);
                 }
                 else if(fbody.message.method === "notifyTurn") {
-                    setTurn(fbody.message.body.turnId);
+                    setTurn(connectionInfo.userList.find((e)=> e.userId === fbody.message.body.turnId).username);
                     if(fbody.message.body.turnId === connectionInfo.user.userId){
                         console.log("It's your turn!")
                         setPhase(2);
@@ -204,9 +195,18 @@ const GameForm = ({ }) => {
                     console.log("notify liar opened")
                     setPhase(5);
                     for(let i=0; i<connectionInfo.userList.length; ++i){
+                        let userIdx = -1;
+                        if(connectionInfo.user && connectionInfo.userList){
+                            userIdx = connectionInfo.userList.findIndex((e)=>e.userId === fbody.message.body.liar)
+                            setLiar(connectionInfo.userList[userIdx].userId)
+                        }
+                        if(connectionInfo.user.userId === fbody.message.body.liar) {
+                            setMustAnswer(true);
+                            setPhase(6);
+                        }
                         if(connectionInfo.userList[i].userId === fbody.message.body.liar)
                         {
-                            setLiar(connectionInfo.userList[i].username);
+                            setLiar(connectionInfo.userList[i].userId);
                             if(connectionInfo.user.userId === fbody.message.body.liar) {
                                 setMustAnswer(true);
                                 setPhase(6);
@@ -234,6 +234,9 @@ const GameForm = ({ }) => {
                 fbody=JSON.parse(frame.body);
                 if(fbody.message.method === "notifyLiarSelected")
                 {
+                    if(fbody.message.body.liar) {
+                        setLiar(connectionInfo.user.userId);
+                    }
                     if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
                         console.log("notifyLiarSelected - openKeyword")
                         stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
@@ -245,11 +248,8 @@ const GameForm = ({ }) => {
                 }
                 else if(fbody.message.method === "notifyKeywordOpened") {
                     console.log("notifyGameState", fbody)
-                    setCategory(fbody.message.category)
-                    // if(fbody.message.keyword === "LIAR") {
-                    //     setLiar(true);
-                    // }
-                    setKeyword(fbody.message.keyword);
+                    setCategory(fbody.message.body.category)
+                    setKeyword(fbody.message.body.keyword.length > 0 ? fbody.message.body.keyword : "LIAR");
                 }
                 else if(fbody.message.method === "notifyGameState") {
                     console.log("notifyGameState", fbody)
@@ -283,15 +283,6 @@ const GameForm = ({ }) => {
             setMessage('');
         }
     }
-
-    // const submitHint = (hint) => { //hint 제출 API 전달받으면 본격적으로 작업
-    //     if(connectionInfo.room.roomId) {
-    //         console.log("submit Hint", hint);
-    //         const tmp = [...hints];
-    //         tmp[0] = hint;
-    //         setHints(tmp);
-    //     }
-    // }
 
     const sendVote = (index) => {
         if(connectionInfo.room.roomId && connectionInfo.userList) {
@@ -327,10 +318,8 @@ const GameForm = ({ }) => {
         startGame={startGame}
         leaveTheRoom={leaveTheRoom}
         toResult={toResult}
-        members={members}
+        members={connectionInfo ? connectionInfo.userList : []}
         phase={phase}
-        // hints={hints}
-        // submitHint={submitHint}
         category={category}
         keyword={keyword}
         round={round}

@@ -10,6 +10,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
     message, setMessage, sendMessage, chatlog 
 }) => {
     let notice;
+    let liarName = liar && members.length > 0 ? members.find((e)=>e.userId === liar).username : "";
     switch(phase) {
         case 0: notice = "게임 시작 전 대기"; break;
         case 1: notice = "라운드 진행 중"; break;
@@ -26,14 +27,14 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                     <Grid item xs={3}>
                         <Grid container direction="column" spacing={1}>
                         {
-                            Array.from({ length: members.length/2 },(_,i) => 
+                            Array.from({ length: (members.length+1)/2 },(_,i) => 
                                 <Grid item key={i}>
                                     <Paper >
                                         <Grid container direction="column">
                                             <Grid item>
                                                 <Grid container direction="row" justifyContent="space-around" alignItems="center">
                                                     <Grid item onClick={()=>sendVote(2*i)}>
-                                                        {PlayerIcon[2*i]}
+                                                        {members[2*i].userId === liar ? PlayerIcon[6] : PlayerIcon[2*i]}
                                                     </Grid>
                                                     <Grid item>
                                                         <Paper>
@@ -45,7 +46,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                             <Grid item>
                                                 <Grid container direction="row" justifyContent="space-around">
                                                     <Grid item>
-                                                        <p>{members[2*i]}</p>
+                                                        <p>{members[2*i].username}</p>
                                                     </Grid>
                                                     <Grid item>
                                                         <p>승점</p>
@@ -68,7 +69,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                             <Grid container direction="row" alignItems="center" justifyContent="space-between">
                                                 <Grid item>
                                                     <p>
-                                                        게임정보 {round>0 && `라운드 ${round} / 턴 ${turn} / 키워드 ${keyword}`}
+                                                        게임정보 {round>0 && `라운드 ${round} / 턴 ${turn} / 카테고리 ${category}`}
                                                     </p>
                                                 </Grid>
                                                 <Grid item>
@@ -84,9 +85,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                                     <p>키워드</p>
                                                 </Grid>
                                                 <Grid item>
-                                                    <p>
-                                                        keyword
-                                                    </p>
+                                                    <p>{keyword}</p>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
@@ -146,7 +145,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                             <Grid item>
                                                 <Grid container direction="row" justifyContent="space-around" alignItems="center">
                                                     <Grid item onClick={()=>sendVote(2*i + 1)}>
-                                                        {PlayerIcon[2*i + 1]}
+                                                        {members[2*i + 1].userId === liar ? PlayerIcon[6] : PlayerIcon[2*i + 1]}
                                                     </Grid>
                                                     <Grid item>
                                                         <Paper>
@@ -158,7 +157,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                             <Grid item>
                                                 <Grid container direction="row" justifyContent="space-around">
                                                     <Grid item>
-                                                        <p>{members[2*i + 1]}</p>
+                                                        <p>{members[2*i + 1].username}</p>
                                                     </Grid>
                                                     <Grid item>
                                                         <p>승점</p>
@@ -174,13 +173,6 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                     </Grid>
                 </Grid>
             </main>
-            {/* <InputModal
-                open={phase==2}
-                message="키워드는 ---. 힌트를 주세요(구현 중)."
-                value={hints[0]}
-                handleInput={()=>console.log("must implement")}
-                submit={submitHint}
-            /> */}
             <InputModal
                 open={mustAnswer}
                 message="라이어로 지목되었습니다. 정답을 맞춰주세요."
