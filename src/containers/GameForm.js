@@ -28,10 +28,10 @@ const GameForm = ({ }) => {
     const [message, setMessage] = useState('');
     const [stompClient, setStompClient] = useState(null);
     const [phase, setPhase] = useState(0); // 0: 게임시작전, 1: 라운드 본인 턴 아님 2: 라운드 본인 턴 3: 투표 4: 투표 종료 5: 투표 결과 발표 6: 라이어 정답 맞추기 7: 게임 종료
-    // const [hints,setHints] = useState(['','','','','','']); //유저 별 힌트
+    const [hints,setHints] = useState(['d','d','d','d','d','d']); //유저 별 힌트
     const [category, setCategory] = useState('');
     const [keyword, setKeyword] = useState('');
-    const [turn, setTurn] = useState('');
+    const [turn, setTurn] = useState(null);
     const [liar, setLiar] = useState(null);
     const [round, setRound] = useState(0);
     const [mustAnswer, setMustAnswer] = useState(false); //라이어가 걸렸으면 정답 입력해야함
@@ -54,6 +54,19 @@ const GameForm = ({ }) => {
             }, 200);
         }
     },[phase]);
+
+    useEffect(() => {
+        return () => {
+            console.log("clear all interval")
+            // Get a reference to the last interval + 1
+            const interval_id = window.setInterval(function(){}, Number.MAX_SAFE_INTEGER);
+
+            // Clear any timeout/interval up to that id
+            for (let i = 1; i < interval_id; i++) {
+            window.clearInterval(i);
+            }
+        }
+    },[])
 
     const leaveTheRoom = () => {
         console.log("leave room")
@@ -114,11 +127,19 @@ const GameForm = ({ }) => {
             //클라이언트끼리 대화
             stompClient.subscribe(`/subscribe/room/${connectionInfo.room.roomId}/chat`, function (frame) {
                 console.log("subscribe chat", frame.body);
+                fbody=JSON.parse(frame.body);
                 let userIdx = -1;
                 if(connectionInfo.user && connectionInfo.userList){
-                    userIdx = connectionInfo.userList.findIndex((e)=>e.userId === JSON.parse(frame.body).senderId)
+                    userIdx = connectionInfo.userList.findIndex((e)=>e.userId === fbody.senderId)
                 }
-                setChatlog((prevLog)=>([...prevLog, <p key={Date.now()} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>]))
+                if(fbody.type === "MESSAGE")
+                    setChatlog((prevLog)=>([...prevLog, <p key={Date.now()} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>]));
+                else if(fbody.type === "DESCRIPTION") {
+                    setHints((prevHints) => {
+                        prevHints[userIdx] += fbody.message;
+                        return prevHints;
+                    })
+                }
             }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
     
             //사람 들어온것 =>웹소켓, STOMP 연결하면 자동으로 날라오는것.
@@ -162,7 +183,7 @@ const GameForm = ({ }) => {
                     setRound((prevRound) => prevRound + 1);
                 }
                 else if(fbody.message.method === "notifyTurn") {
-                    setTurn(connectionInfo.userList.find((e)=> e.userId === fbody.message.body.turnId).username);
+                    setTurn(connectionInfo.userList.find((e)=> e.userId === fbody.message.body.turnId));
                     if(fbody.message.body.turnId === connectionInfo.user.userId){
                         console.log("It's your turn!")
                         setPhase(2);
@@ -277,7 +298,13 @@ const GameForm = ({ }) => {
     }
 
     const sendMessage = () => {
-        const m = {"message": message,"senderId": connectionInfo.user.userId}
+        let messageType = "MESSAGE";
+        if(turn && turn.userId === connectionInfo.user.userId) {
+            console.log("send hint")
+            messageType = "DESCRIPTION";
+        }
+            
+        const m = {"message": message,"senderId": connectionInfo.user.userId, "type": messageType};
         if(connectionInfo.room.roomId) {
             stompClient.send(`/publish/messages/${connectionInfo.room.roomId}`, {}, JSON.stringify(m));
             setMessage('');
@@ -324,6 +351,7 @@ const GameForm = ({ }) => {
         keyword={keyword}
         round={round}
         turn={turn}
+        hints={hints}
         sendVote={sendVote}
         liar={liar}
         mustAnswer={mustAnswer}

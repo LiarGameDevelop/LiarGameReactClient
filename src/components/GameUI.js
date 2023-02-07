@@ -5,12 +5,12 @@ import InputModal from './common/InputModal'
 
 const PlayerIcon = [<Dog1 />, <Dog2 />, <Dog3 />, <Dog4 />, <Dog5 />, <Dog6 />, <Cat />];
 const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, 
-    category, keyword, round, turn,// hints, submitHint, 
+    category, keyword, round, turn, hints,
     sendVote, liar, mustAnswer, answer, setAnswer, submitAnswer, fuse,
     message, setMessage, sendMessage, chatlog 
 }) => {
     let notice;
-    let liarName = liar && members.length > 0 ? members.find((e)=>e.userId === liar).username : "";
+    // let liarName = liar && members.length > 0 ? members.find((e)=>e.userId === liar).username : "";
     switch(phase) {
         case 0: notice = "게임 시작 전 대기"; break;
         case 1: notice = "라운드 진행 중"; break;
@@ -38,7 +38,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                                     </Grid>
                                                     <Grid item>
                                                         <Paper>
-                                                            hint
+                                                            {hints[2*i]}
                                                         </Paper>
                                                     </Grid>
                                                 </Grid>
@@ -69,7 +69,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                             <Grid container direction="row" alignItems="center" justifyContent="space-between">
                                                 <Grid item>
                                                     <p>
-                                                        게임정보 {round>0 && `라운드 ${round} / 턴 ${turn} / 카테고리 ${category}`}
+                                                        게임정보 {round>0 && `라운드 ${round} / 턴 ${turn && turn.username} / 카테고리 ${category}`}
                                                     </p>
                                                 </Grid>
                                                 <Grid item>
@@ -149,7 +149,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                                     </Grid>
                                                     <Grid item>
                                                         <Paper>
-                                                            hint
+                                                            {hints[2*i + 1]}
                                                         </Paper>
                                                     </Grid>
                                                 </Grid>
