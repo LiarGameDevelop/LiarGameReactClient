@@ -17,8 +17,9 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
         case 2: notice = "채팅창에 힌트를 입력해주세요"; break;
         case 3: notice = "라이어를 지목해주세요. 라이어의 아이콘을 클릭"; break;
         case 4: notice = "투표가 종료되었습니다"; break;
-        case 5: notice = `${liar}님이 라이어로 지목되었습니다.`;
-        case 6: notice = `${liar}님은 라이어가 맞습니다. 정답을 맞추는 중입니다.`;
+        case 5: notice = `${liar}님이 라이어로 지목되었습니다.`; break;
+        case 6: notice = `${liar}님은 라이어가 맞습니다. 정답을 맞추는 중입니다.`; break;
+        case 7: notice = `라운드가 종료되었습니다.`;
     }
     return (
         <React.Fragment>
@@ -28,34 +29,34 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                         <Grid container direction="column" spacing={1}>
                         {
                             Array.from({ length: (members.length+1)/2 },(_,i) => 
-                                <Grid item key={i}>
-                                    <Paper >
-                                        <Grid container direction="column">
-                                            <Grid item>
-                                                <Grid container direction="row" justifyContent="space-around" alignItems="center">
-                                                    <Grid item onClick={()=>sendVote(2*i)}>
-                                                        {members[2*i].userId === liar ? PlayerIcon[6] : PlayerIcon[2*i]}
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Paper>
-                                                            {hints[2*i]}
-                                                        </Paper>
-                                                    </Grid>
+                            <Grid item key={i}>
+                                <Paper >
+                                    <Grid container direction="column">
+                                        <Grid item>
+                                            <Grid container direction="row" justifyContent="space-around" alignItems="center">
+                                                <Grid item onClick={()=>sendVote(2*i)}>
+                                                    {members[2*i].userId === liar ? PlayerIcon[6] : PlayerIcon[2*i]}
                                                 </Grid>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container direction="row" justifyContent="space-around">
-                                                    <Grid item>
-                                                        <p>{members[2*i].username}</p>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <p>승점</p>
-                                                    </Grid>
+                                                <Grid item>
+                                                    <Paper>
+                                                        {hints[2*i]}
+                                                    </Paper>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
-                                    </Paper>
-                                </Grid>
+                                        <Grid item>
+                                            <Grid container direction="row" justifyContent="space-around">
+                                                <Grid item>
+                                                    <p>{members[2*i].username}</p>
+                                                </Grid>
+                                                <Grid item>
+                                                    <p>승점</p>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Paper>
+                            </Grid>
                             )
                         }
                         </Grid>

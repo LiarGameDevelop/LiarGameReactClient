@@ -36,22 +36,35 @@ const GameForm = ({ }) => {
     const [round, setRound] = useState(0);
     const [mustAnswer, setMustAnswer] = useState(false); //라이어가 걸렸으면 정답 입력해야함
     const [answer, setAnswer] = useState(''); //라이어 입력 정답
-    const [fuse, setFuse] = useState(0); //힌트, 투표, 정답 입력용 타이머
+    const [fuse, setFuse] = useState(0); //힌트, 투표, 정답 입력용 타이머 progress
+    const [timer, setTimer] = useState(0); // 타이머
     const [chatlog, setChatlog] = useState([]);
 
     useEffect(() => {
         if(phase===2 || phase===3 || phase===6) {
-            const timer = setInterval(() => {
-                console.log("fuse ", fuse)
+            const t = setInterval(() => {
                 setFuse((prevFuse) => {
                     if(prevFuse === 100) {
-                        console.log("time up")
-                        clearInterval(timer);
+                        console.log("time up", t)
+                        clearInterval(t);
                         return 0;
                     }
                     return (prevFuse + 1);
                 })
             }, 200);
+            console.log("set timer", t);
+            setTimer(t);
+        }
+        else {
+            console.log("clear timer ", timer)
+            // clearInterval(timer);
+            //TODO: interval 조정 좀 더 정교하게?
+            const interval_id = window.setInterval(function(){}, Number.MAX_SAFE_INTEGER);
+            // Clear any timeout/interval up to that id
+            for (let i = 1; i < interval_id; i++) {
+                window.clearInterval(i);
+            }
+            setFuse(0);
         }
     },[phase]);
 
@@ -63,7 +76,7 @@ const GameForm = ({ }) => {
 
             // Clear any timeout/interval up to that id
             for (let i = 1; i < interval_id; i++) {
-            window.clearInterval(i);
+                window.clearInterval(i);
             }
         }
     },[])
@@ -133,11 +146,19 @@ const GameForm = ({ }) => {
                     userIdx = connectionInfo.userList.findIndex((e)=>e.userId === fbody.senderId)
                 }
                 if(fbody.type === "MESSAGE")
-                    setChatlog((prevLog)=>([...prevLog, <p key={Date.now()} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>]));
+                    setChatlog((prevLog)=>([...prevLog, <p key={prevLog.length} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>]));
                 else if(fbody.type === "DESCRIPTION") {
+                    // setHints((prevHints) => {
+                    //     let target=prevHints[userIdx]
+                    //     target = [...target,<p key={target.length}>{fbody.message}</p>];
+                    //     prevHints[userIdx] = target;
+                    //     console.log("set hints", prevHints)
+                    //     return [...prevHints];
+                    // })
                     setHints((prevHints) => {
                         prevHints[userIdx] += fbody.message;
-                        return prevHints;
+                        console.log("set hints", prevHints)
+                        return [...prevHints];
                     })
                 }
             }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
@@ -180,6 +201,7 @@ const GameForm = ({ }) => {
                             "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
                         }));
                     }
+                    setHints(['','','','','','']);
                     setRound((prevRound) => prevRound + 1);
                 }
                 else if(fbody.message.method === "notifyTurn") {
@@ -241,12 +263,57 @@ const GameForm = ({ }) => {
 
                 }
                 else if(fbody.message.method === "notifyLiarAnswerCorrect") {
+                    setPhase(7)
                     if(fbody.message.body.answer) {
                         console.log("Liar is correct");
                     }
                     else {
                         console.log("liar is incorrect")
                     }
+                    if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                        stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
+                            "message":{"method":"openScores", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));   
+                    }  
+                }
+                else if(fbody.message.method === "notifyLiarAnswerTimeout") {
+                    setPhase(7)
+                    console.log("liar timeout")
+                    if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                        stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
+                            "message":{"method":"openScores", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));   
+                    }  
+                }
+                else if(fbody.message.method === "notifyScores") {
+                    console.log("scoreboard", fbody.message.body.scoreboard)
+                }
+                else if(fbody.message.method === "notifyRoundEnd") {
+                    console.log("round end");
+                    if(fbody.message.body.state = "BEFORE_ROUND" && connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                        stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
+                            "message":{"method":"startRound", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));  
+                    }
+                    else if(fbody.message.body.state = "PUBLISH_RANKINGS" && connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                        stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
+                            "message":{"method":"publishRankings", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));  
+                    }
+                }
+                else if(fbody.message.method === "notifyRankingsPublished") {
+                    console.log("rankingsPublished")
+                }
+                else if(fbody.message.method === "notifyGameEnd") {
+                    console.log("game end")
                 }
             }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
@@ -290,7 +357,7 @@ const GameForm = ({ }) => {
         {            
             stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
                 "senderId":connectionInfo.room.ownerId, 
-                "message":{"method":"startGame", "body":{"round":5,"turn":2,"category":["food","sports"]}},
+                "message":{"method":"startGame", "body":{"round":2,"turn":2,"category":["food","sports"]}},
                 "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
             }));
             console.log("start game!");
