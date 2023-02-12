@@ -145,9 +145,8 @@ const GameForm = ({ }) => {
                 if(connectionInfo.user && connectionInfo.userList){
                     userIdx = connectionInfo.userList.findIndex((e)=>e.userId === fbody.senderId)
                 }
-                if(fbody.type === "MESSAGE")
-                    setChatlog((prevLog)=>([...prevLog, <p key={prevLog.length} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>]));
-                else if(fbody.type === "DESCRIPTION") {
+                setChatlog((prevLog)=>([...prevLog, <p key={prevLog.length} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>]));
+                if(fbody.type === "DESCRIPTION") {
                     // setHints((prevHints) => {
                     //     let target=prevHints[userIdx]
                     //     target = [...target,<p key={target.length}>{fbody.message}</p>];
