@@ -6,7 +6,9 @@ import InputModal from './common/InputModal'
 const PlayerIcon = [<Dog1 />, <Dog2 />, <Dog3 />, <Dog4 />, <Dog5 />, <Dog6 />, <Cat />];
 const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, 
     category, keyword, round, turn, hints,
-    sendVote, liar, mustAnswer, answer, setAnswer, submitAnswer, fuse,
+    sendVote, liar, 
+    // mustAnswer, answer, setAnswer, submitAnswer, 
+    fuse,
     message, setMessage, sendMessage, chatlog 
 }) => {
     let notice;
@@ -39,7 +41,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                                 </Grid>
                                                 <Grid item>
                                                     <Paper>
-                                                        {hints[2*i]}
+                                                        <pre>{hints[2*i]}</pre>
                                                     </Paper>
                                                 </Grid>
                                             </Grid>
@@ -150,7 +152,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                                     </Grid>
                                                     <Grid item>
                                                         <Paper>
-                                                            {hints[2*i + 1]}
+                                                            <pre>{hints[2*i + 1]}</pre>
                                                         </Paper>
                                                     </Grid>
                                                 </Grid>
@@ -174,13 +176,13 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                     </Grid>
                 </Grid>
             </main>
-            <InputModal
+            {/* <InputModal
                 open={mustAnswer}
                 message="라이어로 지목되었습니다. 정답을 맞춰주세요."
                 value={answer}
                 handleInput={setAnswer}
                 submit={submitAnswer}
-            />
+            /> */}
         </React.Fragment>
       );
 }

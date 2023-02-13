@@ -145,21 +145,15 @@ const GameForm = ({ }) => {
                 if(connectionInfo.user && connectionInfo.userList){
                     userIdx = connectionInfo.userList.findIndex((e)=>e.userId === fbody.senderId)
                 }
-                setChatlog((prevLog)=>([...prevLog, <p key={prevLog.length} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>]));
                 if(fbody.type === "DESCRIPTION") {
-                    // setHints((prevHints) => {
-                    //     let target=prevHints[userIdx]
-                    //     target = [...target,<p key={target.length}>{fbody.message}</p>];
-                    //     prevHints[userIdx] = target;
-                    //     console.log("set hints", prevHints)
-                    //     return [...prevHints];
-                    // })
                     setHints((prevHints) => {
-                        prevHints[userIdx] += fbody.message;
+                        // prevHints[userIdx] += fbody.message + '\n';
                         console.log("set hints", prevHints)
-                        return [...prevHints];
+                        // return [fbody.message, ...prevHints];
+                        return [...prevHints.slice(0,userIdx),prevHints[userIdx] + fbody.message + '\n',...prevHints.slice(userIdx,prevHints.length)];
                     })
                 }
+                setChatlog((prevLog)=>([...prevLog, <p key={prevLog.length} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>]));
             }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
     
             //사람 들어온것 =>웹소켓, STOMP 연결하면 자동으로 날라오는것.
@@ -201,6 +195,7 @@ const GameForm = ({ }) => {
                         }));
                     }
                     setHints(['','','','','','']);
+                    setLiar(null);
                     setRound((prevRound) => prevRound + 1);
                 }
                 else if(fbody.message.method === "notifyTurn") {
@@ -364,17 +359,30 @@ const GameForm = ({ }) => {
     }
 
     const sendMessage = () => {
-        let messageType = "MESSAGE";
-        if(turn && turn.userId === connectionInfo.user.userId) {
-            console.log("send hint")
-            messageType = "DESCRIPTION";
+        if(mustAnswer) {
+            if(connectionInfo.room.roomId) {
+                stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                    "senderId":connectionInfo.user.userId, 
+                    "message":{"method":"checkKeywordCorrect", "body": {"keyword": message}},
+                    "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                }));  
+            }
+            setMustAnswer(false);
         }
-            
-        const m = {"message": message,"senderId": connectionInfo.user.userId, "type": messageType};
-        if(connectionInfo.room.roomId) {
-            stompClient.send(`/publish/messages/${connectionInfo.room.roomId}`, {}, JSON.stringify(m));
-            setMessage('');
+        else {
+            let messageType = "MESSAGE";
+            if(turn && turn.userId === connectionInfo.user.userId) {
+                console.log("send hint")
+                messageType = "DESCRIPTION";
+            }
+                
+            const m = {"message": message,"senderId": connectionInfo.user.userId, "type": messageType};
+            if(connectionInfo.room.roomId) {
+                stompClient.send(`/publish/messages/${connectionInfo.room.roomId}`, {}, JSON.stringify(m));
+                
+            }
         }
+        setMessage('');
     }
 
     const sendVote = (index) => {
@@ -385,17 +393,6 @@ const GameForm = ({ }) => {
                 "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
             }));  
         }
-    }
-
-    const submitAnswer = () => {
-        if(connectionInfo.room.roomId) {
-            stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
-                "senderId":connectionInfo.user.userId, 
-                "message":{"method":"checkKeywordCorrect", "body": {"keyword": answer}},
-                "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-            }));  
-        }
-        setMustAnswer(false);
     }
 
     const disconnect = () => {
@@ -420,10 +417,10 @@ const GameForm = ({ }) => {
         hints={hints}
         sendVote={sendVote}
         liar={liar}
-        mustAnswer={mustAnswer}
-        answer={answer}
-        setAnswer={setAnswer}
-        submitAnswer={submitAnswer}
+        // mustAnswer={mustAnswer}
+        // answer={answer}
+        // setAnswer={setAnswer}
+        // submitAnswer={submitAnswer}
         fuse={fuse}
         message={message}
         setMessage={setMessage}
