@@ -1,14 +1,11 @@
 import React from 'react';
 import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material';
 import { Dog1, Dog2, Dog3, Dog4, Dog5, Dog6, Cat } from '../assets/image'
-import InputModal from './common/InputModal'
 
 const PlayerIcon = [<Dog1 />, <Dog2 />, <Dog3 />, <Dog4 />, <Dog5 />, <Dog6 />, <Cat />];
 const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, 
     category, keyword, round, turn, hints,
-    sendVote, liar, 
-    // mustAnswer, answer, setAnswer, submitAnswer, 
-    fuse,
+    sendVote, liar, fuse,
     message, setMessage, sendMessage, chatlog 
 }) => {
     let notice;
@@ -176,13 +173,6 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                     </Grid>
                 </Grid>
             </main>
-            {/* <InputModal
-                open={mustAnswer}
-                message="라이어로 지목되었습니다. 정답을 맞춰주세요."
-                value={answer}
-                handleInput={setAnswer}
-                submit={submitAnswer}
-            /> */}
         </React.Fragment>
       );
 }

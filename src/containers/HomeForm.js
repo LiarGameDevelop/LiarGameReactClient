@@ -1,16 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeRoom, enterRoom } from '../modules/room'
+import { connectStomp } from '../modules/stomp'
 import Home from '../components/HomeUI';
 
 const HomeForm = ({ }) => {
     const dispatch = useDispatch();
-    const { connectionInfo } = useSelector(({ room }) => {
-      return { connectionInfo: room.connectionInfo }
+    const { connectionInfo, stompClient } = useSelector(({ room, stomp }) => {
+      return { connectionInfo: room.connectionInfo, stompClient: stomp.stompClient }
     });
 
     const navigate = useNavigate();
+
+    // useEffect(() => {
+    //     if(connectionInfo) {
+    //         dispatch(connectStomp({connectionInfo}));
+    //         navigate("/game");
+    //     }
+    // }, [connectionInfo]);
+
+    // useEffect(() => {
+    //     console.log("stompClient set", stompClient);
+    //     if(stompClient) {
+    //         navigate("/game");
+    //     }
+    // }, [stompClient]); 
 
     const createRoom = () => {
         navigate("/game");

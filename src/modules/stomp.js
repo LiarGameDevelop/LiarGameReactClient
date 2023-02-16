@@ -16,68 +16,42 @@ const [STOMP_DISCONNECT, STOMP_DISCONNECT_SUCCESS, STOMP_DISCONNECT_FAILURE] = c
     'stomp/DISCONNECT'
 );
 
-export const connectStomp = createAction(STOMP_CONNECT, ({ connectionInfo }) => ({
-    connectionInfo
-}));
+// const [STOMP_SUBSCRIBE, STOMP_SUBSCRIBE_SUCCESS, STOMP_SUBSCRIBE_FAILURE] = createRequestActionTypes(
+//     'stomp/SUBSCRIBE'
+// );
 
-export const disconnectStomp = createAction(STOMP_DISCONNECT, ({stompClient}) => ({
+export const connectStomp = createAction(STOMP_CONNECT, ({ connectionInfo }) => (
+    connectionInfo
+));
+
+export const disconnectStomp = createAction(STOMP_DISCONNECT, ({stompClient}) => (
     stompClient
-}));
+));
 
 const connect = (connectionInfo) => {
-    console.log("socketEndPoint is ",socketEndPoint);
     if(!connectionInfo) {
         console.log("no connection info");
         return;
     }
-    console.log("try connect",connectionInfo);
-
-    const socket = new SockJS(socketEndPoint);
-    console.log("new socket made", JSON.stringify(socket));
-    const stompClient = Stomp.over(socket);
-    // console.log("stompClient :", JSON.stringify(stompClient));
-
-    return stompClient.connect({"username":"chulsoo","roomId":connectionInfo.roomId}, function (frame) {
-        // setConnected(true)
-        console.log('Connected: ' + frame)
-
-        console.info('_gconnectionInfo room id: ' + connectionInfo.roomId)
-
-        //클라이언트끼리 대화
-        stompClient.subscribe(`/subscribe/room/${connectionInfo.roomId}/chat`, function (frame) {
-            addChat(frame.body)
-        })
-
-        //사람 들어온것 =>웹소켓, STOMP 연결하면 자동으로 날라오는것.
-        stompClient.subscribe(`/subscribe/room.login/${connectionInfo.roomId}`, function (frame) {
-            //addChat(greeting)
-            console.info(`Someone entered in room id ${connectionInfo.roomId}`)
-            addChat("entered:"+frame.body);
-        })
-
-        //사람 나간것
-        stompClient.subscribe(`/subscribe/room.logout/${connectionInfo.roomId}`, function (frame) {
-            console.info(`Someone left from room id ${connectionInfo.roomId}`)
-            addChat("left:"+frame.body);
-        })
-
-        //게임서버랑 통신 =>방장:게임을 시작하고, 게임설정(카테고리 설정...)
-        stompClient.subscribe(`/subscribe/system/private/${connectionInfo.roomId}`, function (frame) {
-            addChat("gameserver :"+frame.body);
-        })
-        // return stompClient;
-    })
     
+    return new Promise((resolve) => {
+        const socket = new SockJS(socketEndPoint);
+        const stompClient = Stomp.over(socket);
+        stompClient.connect({"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`},
+                            function (_) {
+            resolve({ data: stompClient });
+        });
+    });    
 }
 
 const disconnect = (stompClient) => {
+    console.log("disconnect stompClient", stompClient)
     if(stompClient) {
-        stompClient.disconnect();
+        return new Promise((resolve) => {
+            stompClient.disconnect();
+            resolve({ data: null });
+        });
     }
-}
-
-const addChat = (message) => {
-    console.log('implement addChat', message);
 }
 
 // saga
