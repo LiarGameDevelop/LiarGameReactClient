@@ -19,6 +19,12 @@ export function* rootSaga() {
 }
 
 const rootReducer = (state, action) => {
+  if (action.type === 'room/LEAVE') {
+    state = undefined
+    console.log("LEAVE")
+    localStorage.removeItem('connectionInfo')
+    localStorage.removeItem('stompClient')
+  }
   return appReducer(state, action)
 }
 

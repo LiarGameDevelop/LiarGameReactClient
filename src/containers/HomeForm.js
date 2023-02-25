@@ -13,22 +13,32 @@ const HomeForm = ({ }) => {
 
     const navigate = useNavigate();
 
-    // useEffect(() => {
-    //     if(connectionInfo) {
-    //         dispatch(connectStomp({connectionInfo}));
-    //         navigate("/game");
-    //     }
-    // }, [connectionInfo]);
+    useEffect(() => {
+        if(connectionInfo) {
+            try{
+                localStorage.setItem('connectionInfo',JSON.stringify(connectionInfo));
+            }
+            catch {
+                console.log("localStorage set connectionInfo fail")
+            }
+            dispatch(connectStomp({connectionInfo}));
+        }
+    }, [connectionInfo]);
 
-    // useEffect(() => {
-    //     console.log("stompClient set", stompClient);
-    //     if(stompClient) {
-    //         navigate("/game");
-    //     }
-    // }, [stompClient]); 
+    useEffect(() => {
+        console.log("stompClient set", stompClient);
+        if(stompClient) {
+            try{
+                localStorage.setItem('stompClient', stompClient);
+            }
+            catch {
+                console.log("localStorage set stomp fail")
+            }
+            navigate(`/game/${connectionInfo.room.roomId}`);
+        }
+    }, [stompClient]); 
 
     const createRoom = () => {
-        navigate("/game");
         console.log("create game: ", connectionInfo);
         dispatch(makeRoom(
             { "maxPersonCount": 5, "ownerName": nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}
@@ -36,7 +46,6 @@ const HomeForm = ({ }) => {
     }
 
     const enterExisting = () => {
-        navigate("/game");
         console.log("enter game: ", connectionInfo);
         dispatch(enterRoom(
             { "roomId": roomCode, "username": nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}

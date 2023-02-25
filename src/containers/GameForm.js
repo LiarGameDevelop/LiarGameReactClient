@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { getRoom, leaveRoom, deleteRoom } from '../modules/room'
+import { getRoom, leaveRoom } from '../modules/room'
 import { connectStomp, disconnectStomp } from '../modules/stomp'
-
-//TODO: Socket 관련 코드는 별도 store로 옮기는걸로 장기적으로.
-import SockJS from 'sockjs-client';
-//
 import Game from '../components/GameUI';
 
 const GameForm = ({ }) => {
@@ -15,38 +11,44 @@ const GameForm = ({ }) => {
       return { connectionInfo: room.connectionInfo, stompClient: stomp.stompClient }
     });
 
-    // const roomNo = useParams().roomNo; //아마 안쓰일듯
     const navigate = useNavigate();
-
-    useEffect(() => {
-        console.log("connection info change ", connectionInfo);
-        if(connectionInfo) {
-            dispatch(connectStomp({connectionInfo}));
-        }
-    }, [connectionInfo]);
 
     useEffect(() => {
         console.log("stompClient info change ", stompClient);
         if(stompClient) {
             subscribe();
+        } else {
+            dispatch(leaveRoom({ "roomId": connectionInfo.room.roomId, "userId": connectionInfo.user.userId, "token": connectionInfo.token.accessToken }));
+            navigate("/");
         }
     }, [stompClient]);
 
-    const [message, setMessage] = useState('');
-    const [phase, setPhase] = useState(0); // 0: 게임시작전, 1: 라운드 본인 턴 아님 2: 라운드 본인 턴 3: 투표 4: 투표 종료 5: 투표 결과 발표 6: 라이어 정답 맞추기 7: 게임 종료
     const [hints,setHints] = useState(['d','d','d','d','d','d']); //유저 별 힌트
-    const [category, setCategory] = useState('');
-    const [keyword, setKeyword] = useState('');
     const [turn, setTurn] = useState(null);
     const [liar, setLiar] = useState(null);
     const [round, setRound] = useState(0);
     const [mustAnswer, setMustAnswer] = useState(false); //라이어가 걸렸으면 정답 입력해야함
     const [fuse, setFuse] = useState(0); //힌트, 투표, 정답 입력용 타이머 progress
     const [timer, setTimer] = useState(0); // 타이머
-    const [chatlog, setChatlog] = useState([]);
+    // const [chatlog, setChatlog] = useState([]);
+
+    const [state, setState] = useState({
+        message : '',
+        phase : 0, // 0: 게임시작전, 1: 라운드 본인 턴 아님 2: 라운드 본인 턴 3: 투표 4: 투표 종료 5: 투표 결과 발표 6: 라이어 정답 맞추기 7: 게임 종료
+        hints : ['d','d','d','d','d','d'],
+        category : '',
+        keyword : '',
+        turn : null,
+        liar : null,
+        round : 0,
+        mustAnswer : false,
+        fuse : 0,
+        timer : 0,
+        chatlog : [],
+    })
 
     useEffect(() => {
-        if(phase===2 || phase===3 || phase===6) {
+        if(state.phase===2 || state.phase===3 || state.phase===6) {
             const t = setInterval(() => {
                 setFuse((prevFuse) => {
                     if(prevFuse === 100) {
@@ -71,7 +73,7 @@ const GameForm = ({ }) => {
             }
             setFuse(0);
         }
-    },[phase]);
+    },[state.phase]);
 
     useEffect(() => {
         return () => {
@@ -88,12 +90,6 @@ const GameForm = ({ }) => {
 
     const leaveTheRoom = () => {
         console.log("leave room")
-        navigate("/");
-        if(connectionInfo) {
-            console.log("should handle leave room");
-            // dispatch(leaveRoom({ "roomId": connectionInfo.room.roomId, "userId": connectionInfo.user.userId, "token": connectionInfo.token.accessToken }));
-            // dispatch(deleteRoom({"roomId": connectionInfo.room.roomId, "room.ownerId": connectionInfo.senderId}));
-        }
         if(stompClient) {
             dispatch(disconnectStomp({stompClient}));
         }
@@ -119,14 +115,6 @@ const GameForm = ({ }) => {
 
         let fbody; // frame JSON으로 처리할 변수
 
-        // setInterval(()=>{
-        //     stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
-        //         "senderId":connectionInfo.user.userId, 
-        //         "message":{"method":"getGameState"},
-        //         "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-        //     }))
-        // }, 60000);
-
         //클라이언트끼리 대화
         stompClient.subscribe(`/subscribe/room/${connectionInfo.room.roomId}/chat`, function (frame) {
             console.log("subscribe chat", frame.body);
@@ -136,13 +124,22 @@ const GameForm = ({ }) => {
                 userIdx = connectionInfo.userList.findIndex((e)=>e.userId === fbody.senderId)
             }
             if(fbody.type === "DESCRIPTION") {
-                setHints((prevHints) => {
-                    // prevHints[userIdx] += fbody.message + '\n';
-                    console.log("set hints", prevHints)
-                    return [...prevHints.slice(0,userIdx),prevHints[userIdx] + fbody.message + '\n',...prevHints.slice(userIdx,prevHints.length)];
-                });
+                // setHints((prevHints) => {
+                //     // prevHints[userIdx] += fbody.message + '\n';
+                //     console.log("set hints", prevHints)
+                //     return [...prevHints.slice(0,userIdx),prevHints[userIdx] + fbody.message + '\n',...prevHints.slice(userIdx,prevHints.length)];
+                // });
+                setState((prevState) => ({ ...prevState,
+                    hints: [...prevState.hints.slice(0,userIdx), prevState.hints[userIdx] + fbody.message + '\n', ...prevState.hints.slice(userIdx,prevState.hints.length)],
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>],
+                }));
             }
-            setChatlog((prevLog)=>([...prevLog, <p key={prevLog.length} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>]));
+            else {
+                setState((prevState) => ({ ...prevState,
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>],
+                }));
+            }
+            // setChatlog((prevLog)=>([...prevLog, <p key={prevLog.length} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>]));
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
         //사람 들어온것 =>웹소켓, STOMP 연결하면 자동으로 날라오는것.
@@ -164,7 +161,7 @@ const GameForm = ({ }) => {
             
             if(fbody.message.method === "notifyGameStarted") {
                 console.log("notifyGameStarted - start Round")
-                setPhase(1);
+                setState((prevState)=>({ ...prevState, phase:1 }));
                 if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
                     stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
                         "senderId":connectionInfo.room.ownerId, 
@@ -191,20 +188,20 @@ const GameForm = ({ }) => {
                 setTurn(connectionInfo.userList.find((e)=> e.userId === fbody.message.body.turnId));
                 if(fbody.message.body.turnId === connectionInfo.user.userId){
                     console.log("It's your turn!")
-                    setPhase(2);
+                    setState((prevState)=>({ ...prevState, phase:2 }));
                 }
             }
             else if(fbody.message.method === "notifyTurnTimeout") {
                 console.log("turn end")
-                setPhase(1);
+                setState((prevState)=>({ ...prevState, phase:1 }));
             }
             else if(fbody.message.method === "notifyFindingLiarEnd") {
                 console.log("finding liar end! start voting")
-                setPhase(3);
+                setState((prevState)=>({ ...prevState, phase:3 }));
             }
             else if(fbody.message.method === "notifyVoteResult") {
                 console.log("voting end! notify result")
-                setPhase(4);
+                setState((prevState)=>({ ...prevState, phase:4 }));
                 if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
                     stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
                         "senderId":connectionInfo.room.ownerId, 
@@ -215,11 +212,11 @@ const GameForm = ({ }) => {
             }
             else if(fbody.message.method === "notifyNewVoteNeeded") {
                 console.log("new vote needed")
-                setPhase(3);
+                setState((prevState)=>({ ...prevState, phase:3 }));
             }
             else if(fbody.message.method === "notifyLiarOpened") {
                 console.log("notify liar opened")
-                setPhase(5);
+                setState((prevState)=>({ ...prevState, phase:5 }));
                 for(let i=0; i<connectionInfo.userList.length; ++i){
                     let userIdx = -1;
                     if(connectionInfo.user && connectionInfo.userList){
@@ -228,14 +225,14 @@ const GameForm = ({ }) => {
                     }
                     if(connectionInfo.user.userId === fbody.message.body.liar) {
                         setMustAnswer(true);
-                        setPhase(6);
+                        setState((prevState)=>({ ...prevState, phase:6 }));
                     }
                     if(connectionInfo.userList[i].userId === fbody.message.body.liar)
                     {
                         setLiar(connectionInfo.userList[i].userId);
                         if(connectionInfo.user.userId === fbody.message.body.liar) {
                             setMustAnswer(true);
-                            setPhase(6);
+                            setState((prevState)=>({ ...prevState, phase:6 }));
                         }
                         break;
                     }
@@ -246,7 +243,7 @@ const GameForm = ({ }) => {
 
             }
             else if(fbody.message.method === "notifyLiarAnswerCorrect") {
-                setPhase(7)
+                setState((prevState)=>({ ...prevState, phase:7 }));
                 if(fbody.message.body.answer) {
                     console.log("Liar is correct");
                 }
@@ -262,7 +259,7 @@ const GameForm = ({ }) => {
                 }  
             }
             else if(fbody.message.method === "notifyLiarAnswerTimeout") {
-                setPhase(7)
+                setState((prevState)=>({ ...prevState, phase:7 }));
                 console.log("liar timeout")
                 if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
                     stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
@@ -319,8 +316,10 @@ const GameForm = ({ }) => {
             }
             else if(fbody.message.method === "notifyKeywordOpened") {
                 console.log("notifyGameState", fbody)
-                setCategory(fbody.message.body.category)
-                setKeyword(fbody.message.body.keyword.length > 0 ? fbody.message.body.keyword : "LIAR");
+                setState((prevState)=>({ ...prevState, 
+                    category: fbody.message.body.category, 
+                    keyword: fbody.message.body.keyword.length > 0 ? fbody.message.body.keyword : "LIAR"
+                }));
             }
             else if(fbody.message.method === "notifyGameState") {
                 console.log("notifyGameState", fbody)
@@ -350,11 +349,11 @@ const GameForm = ({ }) => {
             if(connectionInfo.room.roomId) {
                 stompClient.send(`/publish/private/${connectionInfo.room.roomId}`, {}, JSON.stringify({
                     "senderId":connectionInfo.user.userId, 
-                    "message":{"method":"checkKeywordCorrect", "body": {"keyword": message}},
+                    "message":{"method":"checkKeywordCorrect", "body": {"keyword": state.message}},
                     "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
                 }));  
             }
-            setMustAnswer(false);
+            setState({ ...state, mustAnswer: false, message: '' });
         }
         else {
             let messageType = "MESSAGE";
@@ -363,13 +362,12 @@ const GameForm = ({ }) => {
                 messageType = "DESCRIPTION";
             }
                 
-            const m = {"message": message,"senderId": connectionInfo.user.userId, "type": messageType};
+            const m = {"message": state.message,"senderId": connectionInfo.user.userId, "type": messageType};
             if(connectionInfo.room.roomId) {
                 stompClient.send(`/publish/messages/${connectionInfo.room.roomId}`, {}, JSON.stringify(m));
-                
             }
+            setState({ ...state, message: '' });
         }
-        setMessage('');
     }
 
     const sendVote = (index) => {
@@ -390,19 +388,17 @@ const GameForm = ({ }) => {
         leaveTheRoom={leaveTheRoom}
         toResult={toResult}
         members={connectionInfo ? connectionInfo.userList : []}
-        phase={phase}
-        category={category}
-        keyword={keyword}
+        category={state.category}
+        keyword={state.keyword}
         round={round}
         turn={turn}
         hints={hints}
         sendVote={sendVote}
         liar={liar}
         fuse={fuse}
-        message={message}
-        setMessage={setMessage}
         sendMessage={sendMessage}
-        chatlog={chatlog}
+        state={state}
+        setState={setState}
     />
     );
 };

@@ -3,14 +3,14 @@ import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material'
 import { Dog1, Dog2, Dog3, Dog4, Dog5, Dog6, Cat } from '../assets/image'
 
 const PlayerIcon = [<Dog1 />, <Dog2 />, <Dog3 />, <Dog4 />, <Dog5 />, <Dog6 />, <Cat />];
-const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase, 
-    category, keyword, round, turn, hints,
+const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, 
+    round, turn, hints,
     sendVote, liar, fuse,
-    message, setMessage, sendMessage, chatlog 
+    sendMessage, state, setState,
 }) => {
     let notice;
     // let liarName = liar && members.length > 0 ? members.find((e)=>e.userId === liar).username : "";
-    switch(phase) {
+    switch(state.phase) {
         case 0: notice = "게임 시작 전 대기"; break;
         case 1: notice = "라운드 진행 중"; break;
         case 2: notice = "채팅창에 힌트를 입력해주세요"; break;
@@ -69,7 +69,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                             <Grid container direction="row" alignItems="center" justifyContent="space-between">
                                                 <Grid item>
                                                     <p>
-                                                        게임정보 {round>0 && `라운드 ${round} / 턴 ${turn && turn.username} / 카테고리 ${category}`}
+                                                        게임정보 {round>0 && `라운드 ${round} / 턴 ${turn && turn.username} / 카테고리 ${state.category}`}
                                                     </p>
                                                 </Grid>
                                                 <Grid item>
@@ -85,7 +85,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                                                     <p>키워드</p>
                                                 </Grid>
                                                 <Grid item>
-                                                    <p>{keyword}</p>
+                                                    <p>{state.keyword}</p>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
@@ -104,15 +104,15 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, phase,
                             </Grid>
                             <Grid item>
                                 <Grid id="texting-area" container direction="column">
-                                    <Grid item>{chatlog}</Grid>   
+                                    <Grid item>{state.chatlog}</Grid>   
                                 </Grid>
                             </Grid>
                             <Grid item>
                                 <Grid container direction="row" alignItems="center">
                                     <Grid item xs={10}>
                                         <TextField
-                                            onChange={(e)=>setMessage(e.target.value)}
-                                            value={message}
+                                            onChange={(e)=>setState({...state, message:e.target.value})}
+                                            value={state.message}
                                             style={{width:"95%"}}
                                         />
                                     </Grid>
