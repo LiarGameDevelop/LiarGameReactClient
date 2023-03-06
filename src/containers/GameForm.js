@@ -116,7 +116,7 @@ const GameForm = ({ }) => {
         let fbody; // frame JSON으로 처리할 변수
 
         //클라이언트끼리 대화
-        stompClient.subscribe(`/subscribe/room/${connectionInfo.room.roomId}/chat`, function (frame) {
+        stompClient.subscribe(`/topic/room.${connectionInfo.room.roomId}.chat`, function (frame) {
             console.log("subscribe chat", frame.body);
             fbody=JSON.parse(frame.body);
             let userIdx = -1;
@@ -143,19 +143,19 @@ const GameForm = ({ }) => {
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
         //사람 들어온것 =>웹소켓, STOMP 연결하면 자동으로 날라오는것.
-        stompClient.subscribe(`/subscribe/room.login/${connectionInfo.room.roomId}`, function (frame) {
+        stompClient.subscribe(`/topic/room.${connectionInfo.room.roomId}.login`, function (frame) {
             console.info(`Someone entered in room id ${connectionInfo.room.roomId}`)
             dispatch(getRoom({ "roomId": connectionInfo.room.roomId, "token": connectionInfo.token.accessToken }));
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
         //사람 나간것
-        stompClient.subscribe(`/subscribe/room.logout/${connectionInfo.room.roomId}`, function (frame) {
+        stompClient.subscribe(`/topic/room.${connectionInfo.room.roomId}.logout`, function (frame) {
             console.info(`Someone left from room id ${connectionInfo.room.roomId}`)
             dispatch(getRoom({ "roomId": connectionInfo.room.roomId, "token": connectionInfo.token.accessToken }));
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
         //게임서버랑 통신 =>방장:게임을 시작하고, 게임설정(카테고리 설정...)
-        stompClient.subscribe(`/subscribe/public/${connectionInfo.room.roomId}`, function (frame) {
+        stompClient.subscribe(`/topic/room.${connectionInfo.room.roomId}.user.*`, function (frame) {
             console.log("subscribe public", frame.body);
             fbody=JSON.parse(frame.body);
             
@@ -297,7 +297,7 @@ const GameForm = ({ }) => {
             }
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
-        stompClient.subscribe(`/subscribe/private/${connectionInfo.user.userId}`, function (frame) {
+        stompClient.subscribe(`/amq.queue/room.${connectionInfo.room.roomId}.user.${connectionInfo.user.userId}`, function (frame) {
             console.log("subscribe each client", frame.body);
             fbody=JSON.parse(frame.body);
             if(fbody.message.method === "notifyLiarSelected")
@@ -327,7 +327,7 @@ const GameForm = ({ }) => {
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
         //에러 처리 위한 채널
-        stompClient.subscribe(`/subscribe/errors`, function (frame) {
+        stompClient.subscribe(`/amq.queue/errors.user.${connectionInfo.user.userId}`, function (frame) {
             console.log("subscribe errors",frame.body);
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
     }
