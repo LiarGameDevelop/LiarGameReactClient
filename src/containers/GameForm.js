@@ -297,7 +297,7 @@ const GameForm = ({ }) => {
             }
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
-        stompClient.subscribe(`/amq.queue/room.${connectionInfo.room.roomId}.user.${connectionInfo.user.userId}`, function (frame) {
+        stompClient.subscribe(`/exchange/message.direct/room.${connectionInfo.room.roomId}.user.${connectionInfo.user.userId}`, function (frame) {
             console.log("subscribe each client", frame.body);
             fbody=JSON.parse(frame.body);
             if(fbody.message.method === "notifyLiarSelected")
