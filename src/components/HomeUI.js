@@ -1,12 +1,12 @@
 import React from 'react';
 import { Button, Grid, TextField } from '@mui/material';
 import CreateRoomModal from './common/CreateRoomModal'
-import HelpModal from './common/HelpModal';
 import { Cat } from '../assets/image'
 
 const HomeUI = ({
-    createNew, setCreateNew, createRoom, enterExisting, 
-    nickname, setNickname, roomCode, setRoomCode, openHelp, setOpenHelp,
+    createRoom, enterExisting, 
+    nickname, roomCode,
+    state, setState,
 }) => {
     const regex = new RegExp("^\\s+$");    
     return (
@@ -17,52 +17,48 @@ const HomeUI = ({
                         <Cat />
                     </Grid>
                     <Grid item>
-                        <Button variant="contained" onClick={()=>setOpenHelp(true)}>
+                        {/* <Button variant="contained" onClick={()=>setOpenHelp(true)}>
                             게임 방법
-                        </Button>
+                        </Button> */}
                     </Grid>
                     <Grid item>
                         <TextField
                             label="닉네임 입력(필수)"
-                            onChange={(e)=>setNickname(e.target.value)}
-                            value={nickname}
+                            onChange={(e)=>setState({ ...state, nickname: e.target.value })}
+                            value={state.nickname}
                         />
                     </Grid>
                     <Grid item>
                         <TextField
                             label="방 코드 입력칸"
-                            onChange={(e)=>setRoomCode(e.target.value)}
-                            value={roomCode}
+                            onChange={(e)=>setState({ ...state, roomCode: e.target.value })}
+                            value={state.roomCode}
                         />
                     </Grid>
                     <Grid item>
-                        <Button variant="contained" disabled={nickname==''||regex.test(nickname)} onClick={()=>enterExisting()}>
+                        <Button variant="contained" disabled={ state.nickname==''||regex.test(nickname)} onClick={()=>enterExisting()}>
                             입장하기
                         </Button>
                     </Grid>
                     <Grid item>
-                        <Button variant="contained" disabled={nickname==''||regex.test(nickname)} onClick={()=>setCreateNew(true)}>
+                        <Button variant="contained" disabled={ state.nickname==''||regex.test(nickname)} onClick={()=>setState({ ...state, createNew: true })}>
                             방만들기
                         </Button>
                     </Grid>
                 </Grid>
             </main>
             <CreateRoomModal
-                open={createNew}
+                state={state}
+                setState={setState}
                 message="방 만들기"
                 label="player"
                 // value={connections}
-                cancel={()=>setCreateNew(false)}
+                cancel={()=>setState({ ...state, createNew: false })}
                 submit={()=>{
-                        setCreateNew(false)
+                        setState({ ...state, createNew: false })
                         createRoom()
                     }
                 }
-            />
-            <HelpModal
-                open={openHelp}
-                close={()=>setOpenHelp(false)}
-                helpText={"게임 설명은 여기에"}
             />
         </React.Fragment>
       );

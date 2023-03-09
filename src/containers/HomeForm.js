@@ -41,34 +41,33 @@ const HomeForm = ({ }) => {
     const createRoom = () => {
         console.log("create game: ", connectionInfo);
         dispatch(makeRoom(
-            { "maxPersonCount": 5, "ownerName": nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}
+            { "maxPersonCount": state.maxPersonCount, "ownerName": state.nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}
         ));
     }
 
     const enterExisting = () => {
         console.log("enter game: ", connectionInfo);
         dispatch(enterRoom(
-            { "roomId": roomCode, "username": nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}
+            { "roomId": state.roomCode, "username": state.nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}
         ));
     }
 
-    const [createNew,setCreateNew] = useState(false);
-    const [openHelp, setOpenHelp] = useState(false);
-    const [nickname, setNickname] = useState('');
-    const [roomCode, setRoomCode] = useState('');
+    const [state, setState] = useState({
+        createNew: false,
+        openHelp: false,
+        nickname: '',
+        roomCode: '',
+        maxPersonCount: 3,
+        maxRound: 1,
+        maxHint: 1,
+    })
 
     return (
     <Home
-        createNew={createNew}
-        setCreateNew={setCreateNew}
         createRoom={createRoom}
         enterExisting={enterExisting}
-        nickname={nickname}
-        setNickname={setNickname}
-        roomCode={roomCode}
-        setRoomCode={setRoomCode}
-        openHelp={openHelp}
-        setOpenHelp={setOpenHelp}
+        state={state}
+        setState={setState}
     />
     );
 };

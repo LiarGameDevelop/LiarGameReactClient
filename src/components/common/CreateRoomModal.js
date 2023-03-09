@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
     Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
     FormControl, Grid
 } from '@mui/material';
 
-export default function CreateRoomModal({ open, message, cancel, submit }) {
-    const [person, setPerson] = useState(4);
-    const [round, setRound] = useState(3);
-    const [hint, setHint] = useState(3);
+export default function CreateRoomModal({ state, setState, message, cancel, submit }) {
 
     //state로 처리할지 여부 판단 필요
     const topics = [
@@ -16,7 +13,7 @@ export default function CreateRoomModal({ open, message, cancel, submit }) {
 
     return(
         <Dialog
-            open={open}
+            open={state.createNew}
             maxWidth="lg"
             fullWidth
         >
@@ -26,31 +23,43 @@ export default function CreateRoomModal({ open, message, cancel, submit }) {
             <DialogContent>
                 <Grid container id="create-parameters">
                     <DialogContentText id="parameter-label">인원 수</DialogContentText>
-                    <Button id="round-button" variant='contained' onClick={()=>setPerson(person-1)} disabled={person<=2}>
+                    <Button id="round-button" variant='contained'
+                        onClick={()=>setState({ ...state, maxPersonCount: state.maxPersonCount - 1 })} disabled={state.maxPersonCount <= 2}
+                    >
                         -
                     </Button>
-                    <DialogContentText id="parameter-value">{person}</DialogContentText>
-                    <Button id="round-button" variant='contained' onClick={()=>setPerson(person+1)} disabled={person>=6}>
+                    <DialogContentText id="parameter-value">{state.maxPersonCount}</DialogContentText>
+                    <Button id="round-button" variant='contained'
+                        onClick={()=>setState({ ...state, maxPersonCount: state.maxPersonCount + 1 })} disabled={state.maxPersonCount >= 6}
+                    >
                         +
                     </Button>
                 </Grid>
                 <Grid container id="create-parameters">
                     <DialogContentText id="parameter-label">라운드 수</DialogContentText>
-                    <Button id="round-button" variant='contained' onClick={()=>setRound(round-1)} disabled={round<=1}>
+                    <Button id="round-button" variant='contained'
+                        onClick={()=>setState({ ...state, maxRound: state.maxRound - 1 })} disabled={state.maxRound<=1}
+                    >
                         -
                     </Button>
-                    <DialogContentText id="parameter-value">{round}</DialogContentText>
-                    <Button id="round-button" variant='contained' onClick={()=>setRound(round+1)} disabled={round>=6}>
+                    <DialogContentText id="parameter-value">{state.maxRound}</DialogContentText>
+                    <Button id="round-button" variant='contained'
+                        onClick={()=>setState({ ...state, maxRound: state.maxRound + 1 })} disabled={state.maxRound>=6}
+                    >
                         +
                     </Button>
                 </Grid>
                 <Grid container id="create-parameters">
                     <DialogContentText id="parameter-label">라운드-힌트 수</DialogContentText>
-                    <Button id="round-button" variant='contained' onClick={()=>setHint(hint-1)} disabled={round<=1}>
+                    <Button id="round-button" variant='contained'
+                        onClick={()=>setState({ ...state, maxHint: state.maxHint - 1 })} disabled={state.maxHint<=1}
+                    >
                         -
                     </Button>
-                    <DialogContentText id="parameter-value">{hint}</DialogContentText>
-                    <Button id="round-button" variant='contained' onClick={()=>setRound(hint+1)} disabled={round>=6}>
+                    <DialogContentText id="parameter-value">{state.maxHint}</DialogContentText>
+                    <Button id="round-button" variant='contained'
+                        onClick={()=>setState({ ...state, maxHint: state.maxHint + 1 })} disabled={state.maxHint>=6}
+                    >
                         +
                     </Button>
                 </Grid>
