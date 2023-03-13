@@ -4,8 +4,7 @@ import { Dog1, Dog2, Dog3, Dog4, Dog5, Dog6, Cat } from '../assets/image'
 
 const PlayerIcon = [<Dog1 />, <Dog2 />, <Dog3 />, <Dog4 />, <Dog5 />, <Dog6 />, <Cat />];
 const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, 
-    round, turn, hints,
-    sendVote, liar, fuse,
+    sendVote,
     sendMessage, state, setState,
 }) => {
     let notice;
@@ -16,8 +15,8 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
         case 2: notice = "채팅창에 힌트를 입력해주세요"; break;
         case 3: notice = "라이어를 지목해주세요. 라이어의 아이콘을 클릭"; break;
         case 4: notice = "투표가 종료되었습니다"; break;
-        case 5: notice = `${liar}님이 라이어로 지목되었습니다.`; break;
-        case 6: notice = `${liar}님은 라이어가 맞습니다. 정답을 맞추는 중입니다.`; break;
+        case 5: notice = `${state.liar}님이 라이어로 지목되었습니다.`; break;
+        case 6: notice = `${state.liar}님은 라이어가 맞습니다. 정답을 맞추는 중입니다.`; break;
         case 7: notice = `라운드가 종료되었습니다.`;
     }
     return (
@@ -34,11 +33,11 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
                                         <Grid item>
                                             <Grid container direction="row" justifyContent="space-around" alignItems="center">
                                                 <Grid item onClick={()=>sendVote(2*i)}>
-                                                    {members[2*i].userId === liar ? PlayerIcon[6] : PlayerIcon[2*i]}
+                                                    {members[2*i].userId === state.liar ? PlayerIcon[6] : PlayerIcon[2*i]}
                                                 </Grid>
                                                 <Grid item>
                                                     <Paper>
-                                                        <pre>{hints[2*i]}</pre>
+                                                        <pre>{state.hints[2*i]}</pre>
                                                     </Paper>
                                                 </Grid>
                                             </Grid>
@@ -69,7 +68,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
                                             <Grid container direction="row" alignItems="center" justifyContent="space-between">
                                                 <Grid item>
                                                     <p>
-                                                        게임정보 {round>0 && `라운드 ${round} / 턴 ${turn && turn.username} / 카테고리 ${state.category}`}
+                                                        게임정보 {state.round>0 && `라운드 ${state.round} / 턴 ${state.turn && state.turn.username} / 카테고리 ${state.category}`}
                                                     </p>
                                                 </Grid>
                                                 <Grid item>
@@ -95,7 +94,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
                                                     <p>{notice}</p>
                                                 </Grid>
                                                 <Grid item>
-                                                    <CircularProgress variant="determinate" value={fuse}/>
+                                                    <CircularProgress variant="determinate" value={state.fuse}/>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
@@ -145,11 +144,11 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
                                             <Grid item>
                                                 <Grid container direction="row" justifyContent="space-around" alignItems="center">
                                                     <Grid item onClick={()=>sendVote(2*i + 1)}>
-                                                        {members[2*i + 1].userId === liar ? PlayerIcon[6] : PlayerIcon[2*i + 1]}
+                                                        {members[2*i + 1].userId === state.liar ? PlayerIcon[6] : PlayerIcon[2*i + 1]}
                                                     </Grid>
                                                     <Grid item>
                                                         <Paper>
-                                                            <pre>{hints[2*i + 1]}</pre>
+                                                            <pre>{state.hints[2*i + 1]}</pre>
                                                         </Paper>
                                                     </Grid>
                                                 </Grid>
