@@ -288,14 +288,16 @@ const GameForm = ({ }) => {
             }
             else if(fbody.message.method === "notifyRoundEnd") {
                 console.log("round end");
-                if(fbody.message.body.state = "BEFORE_ROUND" && connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                if(fbody.message.body.state === "BEFORE_ROUND" && connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                    console.log("start round")
                     stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
                         "senderId":connectionInfo.room.ownerId, 
                         "message":{"method":"startRound", "body":null},
                         "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
                     }));  
                 }
-                else if(fbody.message.body.state = "PUBLISH_RANKINGS" && connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                else if(fbody.message.body.state === "PUBLISH_RANKINGS" && connectionInfo.room.ownerId === connectionInfo.user.userId) {
+                    console.log("publish ranking")
                     stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
                         "senderId":connectionInfo.room.ownerId, 
                         "message":{"method":"publishRankings", "body":null},
@@ -342,7 +344,7 @@ const GameForm = ({ }) => {
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
         //에러 처리 위한 채널
-        stompClient.subscribe(`/amq.queue/errors.user.${connectionInfo.user.userId}`, function (frame) {
+        stompClient.subscribe(`/exchange/message.error/user.${connectionInfo.user.userId}`, function (frame) {
             console.log("subscribe errors",frame.body);
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
     }
@@ -352,7 +354,7 @@ const GameForm = ({ }) => {
         {            
             stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
                 "senderId":connectionInfo.room.ownerId, 
-                "message":{"method":"startGame", "body":{"round":2,"turn":2,"category":["food","sports"]}},
+                "message":{"method":"startGame", "body":{"round":1,"turn":1,"category":["food","sports"]}},
                 "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
             }));
             console.log("start game!");
