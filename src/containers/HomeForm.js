@@ -21,28 +21,30 @@ const HomeForm = ({ }) => {
             catch {
                 console.log("localStorage set connectionInfo fail")
             }
-            dispatch(connectStomp({connectionInfo}));
+            // dispatch(connectStomp({connectionInfo}));
+            navigate(`/game/${connectionInfo.room.roomId}`);
         }
     }, [connectionInfo]);
 
-    useEffect(() => {
-        console.log("stompClient set", stompClient);
-        if(stompClient) {
-            try{
-                localStorage.setItem('stompClient', stompClient);
-            }
-            catch {
-                console.log("localStorage set stomp fail")
-            }
-            navigate(`/game/${connectionInfo.room.roomId}`);
-        }
-    }, [stompClient]); 
+    // useEffect(() => {
+    //     console.log("stompClient set", stompClient);
+    //     if(stompClient) {
+    //         try{
+    //             localStorage.setItem('stompClient', stompClient);
+    //         }
+    //         catch {
+    //             console.log("localStorage set stomp fail")
+    //         }
+    //         navigate(`/game/${connectionInfo.room.roomId}`);
+    //     }
+    // }, [stompClient]); 
 
     const createRoom = () => {
         console.log("create game: ", connectionInfo);
         dispatch(makeRoom(
-            { "maxPersonCount": state.maxPersonCount, "ownerName": state.nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}
+            { "maxPersonCount": state.maxPersonCount, "ownerName": state.nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002" }
         ));
+        // navigate(`/game/${connectionInfo.room.roomId}`);
     }
 
     const enterExisting = () => {
@@ -50,6 +52,7 @@ const HomeForm = ({ }) => {
         dispatch(enterRoom(
             { "roomId": state.roomCode, "username": state.nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}
         ));
+        // navigate(`/game/${connectionInfo.room.roomId}`);
     }
 
     const [state, setState] = useState({
