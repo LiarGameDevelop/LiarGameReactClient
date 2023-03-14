@@ -126,13 +126,8 @@ const GameForm = ({ }) => {
                 userIdx = connectionInfo.userList.findIndex((e)=>e.userId === fbody.senderId)
             }
             if(fbody.type === "DESCRIPTION") {
-                // setHints((prevHints) => {
-                //     // prevHints[userIdx] += fbody.message + '\n';
-                //     console.log("set hints", prevHints)
-                //     return [...prevHints.slice(0,userIdx),prevHints[userIdx] + fbody.message + '\n',...prevHints.slice(userIdx,prevHints.length)];
-                // });
                 setState((prevState) => ({ ...prevState,
-                    hints: [...prevState.hints.slice(0,userIdx), prevState.hints[userIdx] + fbody.message + '\n', ...prevState.hints.slice(userIdx,prevState.hints.length)],
+                    hints: [...prevState.hints.slice(0,userIdx), prevState.hints[userIdx] + fbody.message + '\n', ...prevState.hints.slice(userIdx+1,prevState.hints.length)],
                     chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>],
                 }));
             }
@@ -231,9 +226,8 @@ const GameForm = ({ }) => {
                 setState((prevState)=>({ ...prevState, phase:5 }));
                 for(let i=0; i<connectionInfo.userList.length; ++i){
                     let userIdx = -1;
-                    if(connectionInfo.user && connectionInfo.userList){
-                        userIdx = connectionInfo.userList.findIndex((e)=>e.userId === fbody.message.body.liar)
-                        // setLiar(connectionInfo.userList[userIdx].userId)
+                    if(connectionInfo.user && connectionInfo.userList) {
+                        userIdx = connectionInfo.userList.findIndex((e)=>e.userId === fbody.message.body.liar);
                         setState((prevState)=>({ ...prevState, liar: connectionInfo.userList[userIdx].userId }));
                     }
                     if(connectionInfo.user.userId === fbody.message.body.liar) {
@@ -241,7 +235,6 @@ const GameForm = ({ }) => {
                     }
                     if(connectionInfo.userList[i].userId === fbody.message.body.liar)
                     {
-                        // setLiar(connectionInfo.userList[i].userId);
                         if(connectionInfo.user.userId === fbody.message.body.liar) {
                             setState((prevState)=>({ ...prevState, phase:6, mustAnswer: true, liar: connectionInfo.userList[i].userId }));
                         }
@@ -354,7 +347,7 @@ const GameForm = ({ }) => {
         {            
             stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
                 "senderId":connectionInfo.room.ownerId, 
-                "message":{"method":"startGame", "body":{"round":1,"turn":1,"category":["food","sports"]}},
+                "message":{"method":"startGame", "body":{"round":1,"turn":2,"category":["food","sports"]}},
                 "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
             }));
             console.log("start game!");
