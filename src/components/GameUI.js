@@ -8,15 +8,16 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
     sendMessage, state, setState,
 }) => {
     let notice;
-    // let liarName = liar && members.length > 0 ? members.find((e)=>e.userId === liar).username : "";
+    // let liarName = state.liar && members.length > 0 ? members.find((e)=>e.userId === state.liar).username : "";
     switch(state.phase) {
         case 0: notice = "게임 시작 전 대기"; break;
         case 1: notice = "라운드 진행 중"; break;
         case 2: notice = "채팅창에 힌트를 입력해주세요"; break;
         case 3: notice = "라이어를 지목해주세요. 라이어의 아이콘을 클릭"; break;
         case 4: notice = "투표가 종료되었습니다"; break;
-        case 5: notice = `${state.liar}님이 라이어로 지목되었습니다.`; break;
-        case 6: notice = `${state.liar}님은 라이어가 맞습니다. 정답을 맞추는 중입니다.`; break;
+        // case 5: notice = `${liarName}님이 라이어로 지목되었습니다.`; break;
+        case 5: notice = `라이어가 지목되었습니다.`; break;
+        case 6: notice = `라이어가 정답을 맞추는 중입니다.`; break;
         case 7: notice = `라운드가 종료되었습니다.`;
     }
     return (
@@ -111,6 +112,11 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
                                     <Grid item xs={10}>
                                         <TextField
                                             onChange={(e)=>setState({...state, message:e.target.value})}
+                                            onKeyPress={(e) => {
+                                                if (e.key === "Enter") {
+                                                    sendMessage()
+                                                }
+                                            }}
                                             value={state.message}
                                             style={{width:"95%"}}
                                         />

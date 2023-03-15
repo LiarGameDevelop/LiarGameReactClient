@@ -23,9 +23,6 @@ const GameForm = ({ }) => {
         // }
     }, [stompClient]);
 
-    // const [fuse, setFuse] = useState(0); //힌트, 투표, 정답 입력용 타이머 progress
-    // const [timer, setTimer] = useState(0); // 타이머
-
     const [state, setState] = useState({
         message : '',
         phase : 0, // 0: 게임시작전, 1: 라운드 본인 턴 아님 2: 라운드 본인 턴 3: 투표 4: 투표 종료 5: 투표 결과 발표 6: 라이어 정답 맞추기 7: 게임 종료
@@ -37,41 +34,8 @@ const GameForm = ({ }) => {
         round : 0,
         mustAnswer : false,
         fuse : 0,
-        timer : 0,
         chatlog : [],
     })
-
-    // useEffect(() => {
-    //     if(state.phase===2 || state.phase===3 || state.phase===6) {
-    //         // const t = setInterval(() => {
-    //         //     setState((prevState) => {
-    //         //         if(prevState.fuse === 100){
-    //         //             console.log("time up", t)
-    //         //             clearInterval(t);
-    //         //             return 0;
-    //         //         }
-    //         //         return { ...prevState, fuse: prevState.fuse + 1 };
-    //         //     });
-    //         // }, 200);
-    //         const t = 10;
-    //         console.log("set timer", t);
-    //         // // setTimer(t);
-    //         // setState({...state, timer: t});
-    //     }
-    //     // else {
-    //     //     console.log("clear timer ", timer)
-    //     //     clearInterval(timer);
-    //     //     // TODO: interval 조정 좀 더 정교하게?
-    //     //     const interval_id = window.setInterval(function(){}, Number.MAX_SAFE_INTEGER);
-    //     //     // Clear any timeout/interval up to that id
-    //     //     for (let i = 1; i < interval_id; i++) {
-    //     //         window.clearInterval(i);
-    //     //     }
-    //     //     setFuse(0);
-    //     //     setState({...state, fuse: 0});
-    //     // }
-    // },[state.phase]);
-
 
     useEffect(() => {
         dispatch(connectStomp({connectionInfo}));
@@ -140,7 +104,11 @@ const GameForm = ({ }) => {
 
         //사람 들어온것 =>웹소켓, STOMP 연결하면 자동으로 날라오는것.
         stompClient.subscribe(`/topic/room.${connectionInfo.room.roomId}.login`, function (frame) {
-            console.info(`Someone entered in room id ${connectionInfo.room.roomId}`)
+            
+            console.info(`Someone entered`, frame.body)
+            setState((prevState) => ({ ...prevState,
+                chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 새로운 참가자가 입장했습니다.</p>],
+            }));
             dispatch(getRoom({ "roomId": connectionInfo.room.roomId, "token": connectionInfo.token.accessToken }));
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
@@ -157,7 +125,9 @@ const GameForm = ({ }) => {
             
             if(fbody.message.method === "notifyGameStarted") {
                 console.log("notifyGameStarted - start Round")
-                setState((prevState)=>({ ...prevState, phase:1 }));
+                setState((prevState)=>({
+                    ...prevState, phase:1, chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 게임이 시작되었습니다.</p>],
+                }));
                 if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
                     stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
                         "senderId":connectionInfo.room.ownerId, 
@@ -176,10 +146,13 @@ const GameForm = ({ }) => {
                         "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
                     }));
                 }
-                setState((prevState) => ({ ...prevState, hints: ['','','','','',''], liar: null, round: prevState.round +1 })); 
+                setState((prevState) => ({
+                    ...prevState, hints: ['','','','','',''], liar: null, round: prevState.round +1,
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: {prevState.round +1}라운드를 시작합니다.</p>]
+                })); 
             }
             else if(fbody.message.method === "notifyTurn") {
-                // setTurn(connectionInfo.userList.find((e)=> e.userId === fbody.message.body.turnId));
+                let turn = connectionInfo.userList.find((e)=> e.userId === fbody.message.body.turnId);
                 if(fbody.message.body.turnId === connectionInfo.user.userId) {
                     console.log("It's your turn!")
                     const t = setInterval(() => {
@@ -192,10 +165,16 @@ const GameForm = ({ }) => {
                             return { ...prevState, fuse: prevState.fuse + 1 };
                         });
                     }, 200);
-                    setState((prevState)=>({ ...prevState, phase:2, turn: connectionInfo.userList.find((e)=> e.userId === fbody.message.body.turnId) }));
+                    setState((prevState)=>({
+                        ...prevState, phase:2, turn: turn,
+                        chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: {turn.username}의 턴.</p>],
+                    }));
                 }
                 else {
-                    setState((prevState)=>({ ...prevState, turn: connectionInfo.userList.find((e)=> e.userId === fbody.message.body.turnId) }));
+                    setState((prevState)=>({
+                        ...prevState, turn: turn,
+                        chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: {turn.username}의 턴.</p>],
+                    }));
                 }
             }
             else if(fbody.message.method === "notifyTurnTimeout") {
@@ -223,34 +202,46 @@ const GameForm = ({ }) => {
             }
             else if(fbody.message.method === "notifyLiarOpened") {
                 console.log("notify liar opened")
-                setState((prevState)=>({ ...prevState, phase:5 }));
-                for(let i=0; i<connectionInfo.userList.length; ++i){
-                    let userIdx = -1;
-                    if(connectionInfo.user && connectionInfo.userList) {
-                        userIdx = connectionInfo.userList.findIndex((e)=>e.userId === fbody.message.body.liar);
-                        setState((prevState)=>({ ...prevState, liar: connectionInfo.userList[userIdx].userId }));
-                    }
-                    if(connectionInfo.user.userId === fbody.message.body.liar) {
-                        setState((prevState)=>({ ...prevState, phase:6, mustAnswer: true }));
-                    }
-                    if(connectionInfo.userList[i].userId === fbody.message.body.liar)
-                    {
-                        if(connectionInfo.user.userId === fbody.message.body.liar) {
-                            setState((prevState)=>({ ...prevState, phase:6, mustAnswer: true, liar: connectionInfo.userList[i].userId }));
+                const t = setInterval(() => {
+                    setState((prevState) => {
+                        if(prevState.fuse === 100 || prevState.phase != 6){
+                            console.log("end turn", t)
+                            clearInterval(t);
+                            return { ...prevState, fuse: 0 };;
                         }
-                        else {
-                            setState((prevState)=>({ ...prevState, phase:6, liar: connectionInfo.userList[i].userId }));
-                        }
-                        break;
+                        return { ...prevState, fuse: prevState.fuse + 1 };
+                    });
+                }, 200);
+                if(connectionInfo.user.userId === fbody.message.body.liar) {
+                    if(fbody.message.body.matchLiar) {
+                        setState((prevState)=>({
+                            ...prevState, liar: fbody.message.body.liar, phase:6, mustAnswer: true,
+                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾았습니다.</p>],
+                        }));
+                    }
+                    else {
+                        setState((prevState)=>({
+                            ...prevState, liar: fbody.message.body.liar, phase:6, mustAnswer: true,
+                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾지 못했습니다.</p>],
+                        }));
                     }
                 }
-            }
-            else if(fbody.message.method === "notifyLiarAnswerNeeded") {
-                console.log("라이어는 답을 말하라")
-
+                else {
+                    if(fbody.message.body.matchLiar) {
+                        setState((prevState)=>({
+                            ...prevState, liar: fbody.message.body.liar, phase:6,
+                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾았습니다.</p>],
+                        }));
+                    }
+                    else {
+                        setState((prevState)=>({
+                            ...prevState, liar: fbody.message.body.liar, phase:6,
+                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾지 못했습니다.</p>],
+                        }));
+                    }                 
+                }
             }
             else if(fbody.message.method === "notifyLiarAnswerCorrect") {
-                setState((prevState)=>({ ...prevState, phase:7 }));
                 if(fbody.message.body.answer) {
                     console.log("Liar is correct");
                 }
@@ -280,6 +271,7 @@ const GameForm = ({ }) => {
                 console.log("scoreboard", fbody.message.body.scoreboard)
             }
             else if(fbody.message.method === "notifyRoundEnd") {
+                setState((prevState)=>({ ...prevState, phase:7 }));
                 console.log("round end");
                 if(fbody.message.body.state === "BEFORE_ROUND" && connectionInfo.room.ownerId === connectionInfo.user.userId) {
                     console.log("start round")
@@ -303,6 +295,9 @@ const GameForm = ({ }) => {
             }
             else if(fbody.message.method === "notifyGameEnd") {
                 console.log("game end")
+                setState((prevState) => ({ ...prevState,
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 게임이 종료되었습니다.</p>]
+                }));
             }
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
@@ -312,8 +307,15 @@ const GameForm = ({ }) => {
             if(fbody.message.method === "notifyLiarSelected")
             {
                 if(fbody.message.body.liar) {
-                    // setLiar(connectionInfo.user.userId);
-                    setState((prevState)=>({ ...prevState, liar: connectionInfo.user.userId }));
+                    setState((prevState)=>({
+                        ...prevState, liar: connectionInfo.user.userId,
+                        chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 당신은 라이어입니다.</p>]
+                    }));
+                }
+                else {
+                    setState((prevState)=>({
+                        ...prevState, chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 당신은 시민입니다.</p>]
+                    }));
                 }
                 if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
                     console.log("notifyLiarSelected - openKeyword")
@@ -323,6 +325,9 @@ const GameForm = ({ }) => {
                         "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
                     }));   
                 }     
+            }
+            else if(fbody.message.method === "notifyLiarAnswerNeeded") { //라이어만 받는 메세지.
+                console.log("라이어는 답을 말하라")
             }
             else if(fbody.message.method === "notifyKeywordOpened") {
                 console.log("notifyGameState", fbody)
@@ -347,7 +352,7 @@ const GameForm = ({ }) => {
         {            
             stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
                 "senderId":connectionInfo.room.ownerId, 
-                "message":{"method":"startGame", "body":{"round":1,"turn":2,"category":["food","sports"]}},
+                "message":{"method":"startGame", "body":{"round":1,"turn":1,"category":["food","sports"]}},
                 "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
             }));
             console.log("start game!");
@@ -400,9 +405,7 @@ const GameForm = ({ }) => {
         members={connectionInfo ? connectionInfo.userList : []}
         category={state.category}
         keyword={state.keyword}
-
         sendVote={sendVote}
-
         sendMessage={sendMessage}
         state={state}
         setState={setState}
