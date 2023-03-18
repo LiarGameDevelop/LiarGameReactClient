@@ -30,6 +30,14 @@ div#home-main {
   background-color: white;
 }
 
+#selected {
+  background-color: #1976d2;
+}
+
+#unselected {
+  background-color: gray;
+}
+
 div#game-main {
   display: flex;
   /* flex-wrap: wrap; */

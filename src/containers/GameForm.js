@@ -7,8 +7,8 @@ import Game from '../components/GameUI';
 
 const GameForm = ({ }) => {
     const dispatch = useDispatch();
-    const { connectionInfo, stompClient } = useSelector(({ room, stomp }) => {
-      return { connectionInfo: room.connectionInfo, stompClient: stomp.stompClient }
+    const { connectionInfo, stompClient, gameSettings } = useSelector(({ room, stomp, game }) => {
+      return { connectionInfo: room.connectionInfo, stompClient: stomp.stompClient, gameSettings: game.settings }
     });
 
     const navigate = useNavigate();
@@ -105,7 +105,7 @@ const GameForm = ({ }) => {
         //사람 들어온것 =>웹소켓, STOMP 연결하면 자동으로 날라오는것.
         stompClient.subscribe(`/topic/room.${connectionInfo.room.roomId}.login`, function (frame) {
             
-            console.info(`Someone entered`, frame.body)
+            console.info("Someone entered", frame.body)
             setState((prevState) => ({ ...prevState,
                 chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 새로운 참가자가 입장했습니다.</p>],
             }));
@@ -114,8 +114,11 @@ const GameForm = ({ }) => {
 
         //사람 나간것
         stompClient.subscribe(`/topic/room.${connectionInfo.room.roomId}.logout`, function (frame) {
-            console.info(`Someone left from room id ${connectionInfo.room.roomId}`)
+            console.info("Someone left", frame.body)
             dispatch(getRoom({ "roomId": connectionInfo.room.roomId, "token": connectionInfo.token.accessToken }));
+            setState((prevState) => ({ ...prevState,
+                chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 참가자가 방을 나갔습니다.</p>],
+            }));
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
         //게임서버랑 통신 =>방장:게임을 시작하고, 게임설정(카테고리 설정...)
@@ -198,7 +201,9 @@ const GameForm = ({ }) => {
             }
             else if(fbody.message.method === "notifyNewVoteNeeded") {
                 console.log("new vote needed")
-                setState((prevState)=>({ ...prevState, phase:3 }));
+                setState((prevState)=>({ ...prevState, phase:3,
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 동점. 재투표가 필요합니다.</p>],
+                }));
             }
             else if(fbody.message.method === "notifyLiarOpened") {
                 console.log("notify liar opened")
@@ -269,6 +274,17 @@ const GameForm = ({ }) => {
             }
             else if(fbody.message.method === "notifyScores") {
                 console.log("scoreboard", fbody.message.body.scoreboard)
+                // {"scoreboard":{"5922a55d-cbdc-4944-b784-78dcddde939f":0}}
+                let scores = '';
+                for(let id in fbody.message.body.scoreboard){
+                    scores += `${connectionInfo.userList.find((e)=>e.userId === id).username}: ${fbody.message.body.scoreboard[id]}, `;
+                }
+                setState((prevState) => ({ ...prevState,
+                    chatlog: [
+                        ...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 현재 점수를 공개합니다.</p>,
+                        <p key={prevState.chatlog.length+1}> [시스템]: {scores.slice(0,-2)}</p>,
+                    ],
+                }));
             }
             else if(fbody.message.method === "notifyRoundEnd") {
                 setState((prevState)=>({ ...prevState, phase:7 }));
@@ -352,7 +368,7 @@ const GameForm = ({ }) => {
         {            
             stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
                 "senderId":connectionInfo.room.ownerId, 
-                "message":{"method":"startGame", "body":{"round":1,"turn":1,"category":["food","sports"]}},
+                "message":{"method":"startGame", "body":{ "round": gameSettings.maxRound,"turn":1, "category": gameSettings.category }},
                 "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
             }));
             console.log("start game!");
