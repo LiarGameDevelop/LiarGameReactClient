@@ -19,8 +19,8 @@ export const setGame = createAction(SET_GAME, ({ maxPersonCount, maxRound, maxHi
     category
 }));
 
-export const setScore = createAction(SET_RESULT, ({ scores }) => ({
-  scores
+export const setResult = createAction(SET_RESULT, ({ rankings }) => ({
+  rankings
 }));
 
 const initialState = {
@@ -30,7 +30,7 @@ const initialState = {
         category: []
     },
     result: {
-        scores: [],
+        rankings: [],
     },
 };
 
@@ -46,6 +46,12 @@ const game = handleActions(
                 maxRound,
                 maxHint,
                 category
+            }
+        }),
+        [SET_RESULT]: (state, { payload: { rankings } }) => ({
+            ...state,
+            result: {
+                rankings,
             }
         }),
     },

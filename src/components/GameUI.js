@@ -1,11 +1,11 @@
 import React from 'react';
 import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material';
+import ResultUI from './common/ResultModal';
 import { Dog1, Dog2, Dog3, Dog4, Dog5, Dog6, Cat } from '../assets/image'
 
 const PlayerIcon = [<Dog1 />, <Dog2 />, <Dog3 />, <Dog4 />, <Dog5 />, <Dog6 />, <Cat />];
-const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, 
-    sendVote,
-    sendMessage, state, setState,
+const GameUI = ({ isOwner, startGame, leaveTheRoom, members, sendVote, sendMessage, 
+    state, setState, result,
 }) => {
     let notice;
     // let liarName = state.liar && members.length > 0 ? members.find((e)=>e.userId === state.liar).username : "";
@@ -129,13 +129,8 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
                                 </Grid>    
                             </Grid>
                             <Grid item>
-                                <Button variant="contained" onClick={toResult}>
-                                    결과로-to be removed
-                                </Button>
-                            </Grid>
-                            <Grid item>
                                 <Button variant="contained" onClick={leaveTheRoom}>
-                                    방 나가기-to be removed
+                                    방 나가기
                                 </Button>
                             </Grid>
                         </Grid>
@@ -178,6 +173,11 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
                     </Grid>
                 </Grid>
             </main>
+            <ResultUI
+                result={result}
+                state={state}
+                setState={setState}
+            />
         </React.Fragment>
       );
 }

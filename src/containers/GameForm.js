@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { getRoom, leaveRoom } from '../modules/room'
-import stomp, { connectStomp, disconnectStomp, subscribeStomp } from '../modules/stomp'
+import { connectStomp, disconnectStomp, subscribeStomp } from '../modules/stomp'
+import { setResult } from '../modules/game';
 import Game from '../components/GameUI';
 
 const GameForm = ({ }) => {
     const dispatch = useDispatch();
-    const { connectionInfo, stompClient, gameSettings } = useSelector(({ room, stomp, game }) => {
-      return { connectionInfo: room.connectionInfo, stompClient: stomp.stompClient, gameSettings: game.settings }
+    const { connectionInfo, stompClient, gameSettings, result } = useSelector(({ room, stomp, game }) => {
+      return { connectionInfo: room.connectionInfo, stompClient: stomp.stompClient, gameSettings: game.settings, result: game.result }
     });
 
     const navigate = useNavigate();
@@ -35,6 +36,7 @@ const GameForm = ({ }) => {
         mustAnswer : false,
         fuse : 0,
         chatlog : [],
+        showResult: false,
     })
 
     useEffect(() => {
@@ -61,17 +63,6 @@ const GameForm = ({ }) => {
         navigate("/");
     }
 
-    const toResult = () => {
-        console.log("leave room with sock client")
-        if(connectionInfo) {
-            console.log("should handle leave room", connectionInfo.room.roomId, connectionInfo.senderId);
-            // dispatch(deleteRoom({"roomId": connectionInfo.room.roomId, "room.ownerId": connectionInfo.senderId}));
-        }
-
-        navigate("/result");
-    }
-
-    
     const subscribe = () => {
         if(!connectionInfo) {
             console.log("no connection info");
@@ -303,10 +294,13 @@ const GameForm = ({ }) => {
                         "senderId":connectionInfo.room.ownerId, 
                         "message":{"method":"publishRankings", "body":null},
                         "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-                    }));  
+                    }));
                 }
             }
             else if(fbody.message.method === "notifyRankingsPublished") {
+                const rankings = Array.from(fbody.message.body.rankings, x => ({ ...x, username: connectionInfo.userList.find((e) => e.userId === x.id ).username }));
+                dispatch(setResult({ "rankings": rankings }));
+                setState((prevState) => ({ ...prevState, showResult: true }));
                 console.log("rankingsPublished")
             }
             else if(fbody.message.method === "notifyGameEnd") {
@@ -417,7 +411,6 @@ const GameForm = ({ }) => {
         isOwner={connectionInfo && connectionInfo.room.ownerId === connectionInfo.user.userId}
         startGame={startGame}
         leaveTheRoom={leaveTheRoom}
-        toResult={toResult}
         members={connectionInfo ? connectionInfo.userList : []}
         category={state.category}
         keyword={state.keyword}
@@ -425,6 +418,7 @@ const GameForm = ({ }) => {
         sendMessage={sendMessage}
         state={state}
         setState={setState}
+        result={result}
     />
     );
 };
