@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Grid, Button } from '@mui/material';
 
-const ResultUI = ({ result, state, setState }) => {
+const ResultModal = ({ result, state, setState }) => {
     return (
         <Dialog
             open={state.showResult}
@@ -17,10 +17,10 @@ const ResultUI = ({ result, state, setState }) => {
                         <Grid container direction="column" spacing={1}>
                             {
                                 Array.from(result.rankings,(_,i) =>
-                                    <Grid item>
+                                    <Grid item key={i}>
                                         <Grid container direction="row">
-                                            <p>{i+1}. {result.rankings[i].username} : {result.rankings[i].score}
-                                            </p>
+                                            <div id="rank">{i+1}</div>
+                                            <div id="rank-score">{result.rankings[i].username} : {result.rankings[i].score}</div>
                                         </Grid>
                                     </Grid>
                                 )
@@ -38,4 +38,4 @@ const ResultUI = ({ result, state, setState }) => {
       );
 }
 
-export default ResultUI;
+export default ResultModal;
