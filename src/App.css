@@ -47,52 +47,119 @@ div#game-main {
   background-color: white;
 }
 
+div#player-container {
+  width: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+div#gameinfo-container {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+}
+
 div#game-info {
-  padding: 5px;
+  height: 60%;
+  display: flex;
+  color: wheat;
+  font-size: large;
+  font-weight: 800;
+  margin-bottom: 10px;
+  flex-direction: column;
+  background-size: auto auto;
+  background-repeat: no-repeat;
+  background-position: center center; 
+  background-image: url('./assets//image/Board.svg');
+}
+
+#board-item-container {
+  display: flex;
+  padding: 3% 5%;
+  justify-content: space-between;
+}
+
+#button-area {
+  margin-right: 5px;
+}
+
+#input-area {
+  width: 98%;
+  height: 35%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 div#texting-area {
-  background-color: aliceblue;
+  height: 80%;
+  min-height: 100px;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 0.5rem;
   padding-inline-start: 10px;
-  height: 400px;
-  overflow-y: scroll;
+  background-color: aliceblue;
+}
+
+#input-button {
+  height: 15%;
+  display: flex;
+  margin-top: 10px;
+  align-items: center;
 }
 
 div#player-card {
-  margin: 0 10px 0 10px;
   height: 200px;
   max-height: 20vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 330px;
+  margin: 0 10px 20px 10px;
 }
 
 div#player-card-level-0 {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   padding: 0 10px 0 10px;
-  height: 100%;
+  height: 80%;
 }
 
+div#player-card-level-0-1 {
+  display: flex;
+  flex-direction: column;
+}
+
+div#character-div {
+  height: 80%;
+  display: flex;
+  justify-content: center;
+}
+
+div#name-box {
+  height: 15%;
+  display: flex;
+  justify-content: center;
+}
+
+/*Player CSS*/
 div#player-card-level-1 {
   display: flex;
   flex-direction: row;
   align-items: center;
-  height: 50%;
+  height: 15%;
 }
 
 div#icon-box {
-  width: 50%;
-  text-align: center;
+  width: 100%;
+  display: flex;
+  justify-content: left;
 }
 
-<<<<<<< HEAD
-div#characterDiv {
-  padding-top: 50px;
-}
-
-=======
->>>>>>> main
 .hint-box {
   position: relative;
-  background-color: #62a0ff;
+  background-color: #cad9f1;
   border-radius: 5px;
   width: 50%;
   height: 80%;
@@ -105,7 +172,7 @@ div#characterDiv {
   position: absolute;
   left: -30px;
   top: 15px;
-  border-right: 30px solid #62a0ff;
+  border-right: 30px solid #cad9f1;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
 }
@@ -186,7 +253,7 @@ div#rank-score {
 
 .homeCat {
   position: relative;
-  top: -380px;
+  top: -90%;
 }
 
 .marginContainer {
