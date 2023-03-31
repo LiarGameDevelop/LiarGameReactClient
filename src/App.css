@@ -83,6 +83,10 @@ div#icon-box {
   text-align: center;
 }
 
+div#characterDiv {
+  padding-top: 50px;
+}
+
 .hint-box {
   position: relative;
   background-color: #62a0ff;
@@ -159,4 +163,30 @@ div#rank {
 }
 div#rank-score {
   padding: 5px;
+}
+
+.divContainer {
+  width: 100%;
+  height: 98vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.flexContainer {
+  min-width: 600px;
+  margin-top: -80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.homeCat {
+  position: relative;
+  top: -380px;
+}
+
+.marginContainer {
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
