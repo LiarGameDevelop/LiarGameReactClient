@@ -6,7 +6,7 @@ const PlayerCard = ({ icon, hint, name, score, click }) => {
         <Paper id="player-card">
             <div id="player-card-level-0">
                 <div id="player-card-level-1">
-                    <div id="icon-box" onClick={click}>
+                    <div id="characterDiv" onClick={click}>
                         {icon}
                     </div>
                     <div className="hint-box">
