@@ -26,7 +26,26 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, members, sendVote, sendMessa
                 <Grid container id="game-main" direction="row" alignItems="baseline"  spacing={1}>
                     <Grid item xs={3}>
                         <Grid container direction="column" spacing={1}>
-                        {
+                            {/*For Testers: 왼쪽 플레이어카드 테스트하려면 여기에 더미 추가하면 됩니다. */}
+                            <Grid item>
+                                <PlayerCard
+                                    icon={PlayerIcon[6]}
+                                    hint={[<p>힌트1</p>,<p>힌트2</p>]}
+                                    name={"철수"}
+                                    score={10}
+                                    click={()=>console.log("투표용 이벤트")}
+                                />
+                            </Grid>
+                            <Grid item>
+                                <PlayerCard
+                                    icon={PlayerIcon[2]}
+                                    hint={[<p>힌트1</p>,<p>힌트2</p>]}
+                                    name={"영희"}
+                                    score={10}
+                                    click={()=>console.log("투표용 이벤트")}
+                                />
+                            </Grid>
+                        {/* {
                             Array.from({ length: (members.length+1)/2 },(_,i) => 
                             <Grid item key={i}>
                                 <PlayerCard
@@ -38,7 +57,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, members, sendVote, sendMessa
                                 />
                             </Grid>
                             )
-                        }
+                        } */}
                         </Grid>
                     </Grid>
                     <Grid item xs={6}>
@@ -103,6 +122,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, members, sendVote, sendMessa
                                         />
                                     </Grid>
                                     <Grid item xs={2}>
+                                        {/*For Testers: 채팅은 안됩니다. */}
                                         <Button variant="contained" onClick={()=>sendMessage()}>
                                             전송
                                         </Button>
@@ -114,11 +134,36 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, members, sendVote, sendMessa
                                     방 나가기
                                 </Button>
                             </Grid>
+                            {/*For Testers: 더미 결과 팝업 띄우기 버튼. */}
+                            <Grid item>
+                                <Button variant="contained" onClick={()=>setState((prevState) => ({ ...prevState, showResult: true }))}>
+                                    결과 팝업 더미 보여주기
+                                </Button>
+                            </Grid>
                         </Grid>
                     </Grid>
                     <Grid item xs={3}>
                         <Grid container direction="column" spacing={1}>
-                        {
+                            {/*For Testers: 오른쪽 플레이어카드 테스트하려면 여기에 더미 추가하면 됩니다. */}
+                            <Grid item>
+                                <PlayerCard
+                                    icon={PlayerIcon[1]}
+                                    hint={[<p>힌트1</p>,<p>힌트2</p>]}
+                                    name={"철수"}
+                                    score={10}
+                                    click={()=>console.log("투표용 이벤트")}
+                                />
+                            </Grid>
+                            <Grid item>
+                                <PlayerCard
+                                    icon={PlayerIcon[3]}
+                                    hint={[<p>힌트1</p>,<p>힌트2</p>]}
+                                    name={"영희"}
+                                    score={10}
+                                    click={()=>console.log("투표용 이벤트")}
+                                />
+                            </Grid>
+                        {/* {
                             Array.from({ length: members.length/2 },(_,i) => 
                                 <PlayerCard
                                     icon={members[2*i + 1].userId === state.liar ? PlayerIcon[6] : PlayerIcon[2*i + 1]}
@@ -128,11 +173,12 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, members, sendVote, sendMessa
                                     click={()=>sendVote(2*i + 1)}
                                 />
                             )
-                        }
+                        } */}
                         </Grid>
                     </Grid>
                 </Grid>
             </main>
+            {/*For Testers: 결과 팝업. ui 테스트용으로 더미값 넣었읍니다*/}
             <ResultModal
                 result={result}
                 state={state}

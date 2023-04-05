@@ -20,49 +20,37 @@ const HomeForm = ({ }) => {
         dispatch(initializeForm("result"));
     },[]);
 
-    useEffect(() => {
-        if(connectionInfo) {
-            try{
-                localStorage.setItem('connectionInfo',JSON.stringify(connectionInfo));
-            }
-            catch {
-                console.log("localStorage set connectionInfo fail")
-            }
-            // dispatch(connectStomp({connectionInfo}));
-            navigate(`/game/${connectionInfo.room.roomId}`);
-        }
-    }, [connectionInfo]);
-
     // useEffect(() => {
-    //     console.log("stompClient set", stompClient);
-    //     if(stompClient) {
+    //     if(connectionInfo) {
     //         try{
-    //             localStorage.setItem('stompClient', stompClient);
+    //             localStorage.setItem('connectionInfo',JSON.stringify(connectionInfo));
     //         }
     //         catch {
-    //             console.log("localStorage set stomp fail")
+    //             console.log("localStorage set connectionInfo fail")
     //         }
+    //         // dispatch(connectStomp({connectionInfo}));
     //         navigate(`/game/${connectionInfo.room.roomId}`);
     //     }
-    // }, [stompClient]); 
+    // }, [connectionInfo]);
+
 
     const createRoom = () => {
         console.log("create game: ", connectionInfo);
-        dispatch(makeRoom(
-            { "maxPersonCount": state.maxPersonCount, "ownerName": state.nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002" }
-        ));
-        dispatch(setGame({
-            "maxRound": state.maxRound, "maxHint": state.maxHint, "category": state.category,
-        }))
-        // navigate(`/game/${connectionInfo.room.roomId}`);
+        // dispatch(makeRoom(
+        //     { "maxPersonCount": state.maxPersonCount, "ownerName": state.nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002" }
+        // ));
+        // dispatch(setGame({
+        //     "maxRound": state.maxRound, "maxHint": state.maxHint, "category": state.category,
+        // }))
+        navigate(`/game`);
     }
 
     const enterExisting = () => {
         console.log("enter game: ", connectionInfo);
-        dispatch(enterRoom(
-            { "roomId": state.roomCode, "username": state.nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}
-        ));
-        // navigate(`/game/${connectionInfo.room.roomId}`);
+        // dispatch(enterRoom(
+        //     { "roomId": state.roomCode, "username": state.nickname, "password": "ebb9084e-a0ab-11ed-a8fc-0242ac120002"}
+        // ));
+        navigate(`/game`);
     }
 
     const selectCategory = (t) => {
