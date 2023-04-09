@@ -81,7 +81,7 @@ export default function CreateRoomModal({ state, setState, message, cancel, subm
                 <Button onClick={cancel} color="primary">
                     취소
                 </Button>
-                <Button onClick={submit} color="primary">
+                <Button onClick={submit} color="primary" disabled={state.category.length === 0}>
                     생성
                 </Button>
             </DialogActions>

@@ -123,29 +123,33 @@ const GameForm = ({ }) => {
             if(fbody.message.method === "notifyGameStarted") {
                 console.log("notifyGameStarted - start Round")
                 setState((prevState)=>({
-                    ...prevState, phase:1, chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 게임이 시작되었습니다.</p>],
+                    ...prevState, phase:1, chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 게임을 시작합니다...</p>],
                 }));
                 if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
-                    stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
-                        "senderId":connectionInfo.room.ownerId, 
-                        "message":{"method":"startRound", "body":null},
-                        "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-                    }));  
+                    window.setTimeout(()=> {
+                        stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
+                            "message":{"method":"startRound", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));
+                    }, 5000);
                 }
             }
             else if(fbody.message.method === "notifyRoundStarted") {
                 console.log("notifyRoundStarted - start Round")
                 if(state.round===0 && connectionInfo.room.ownerId === connectionInfo.user.userId) {
                     console.log("SELECT_LIAR")
-                    stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
-                        "senderId":connectionInfo.room.ownerId, 
-                        "message":{"method":"selectLiar"},
-                        "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-                    }));
+                    window.setTimeout(()=> {
+                        stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
+                            "message":{"method":"selectLiar"},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));
+                    }, 5000);
                 }
                 setState((prevState) => ({
                     ...prevState, hints: ['','','','','',''], liar: null, round: prevState.round +1,
-                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: {prevState.round +1}라운드를 시작합니다.</p>]
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: {prevState.round +1}라운드를 시작합니다. 키워드 설정 및 라이어 선정 중...</p>]
                 })); 
             }
             else if(fbody.message.method === "notifyTurn") {
@@ -241,28 +245,38 @@ const GameForm = ({ }) => {
             }
             else if(fbody.message.method === "notifyLiarAnswerCorrect") {
                 if(fbody.message.body.answer) {
-                    console.log("Liar is correct");
+                    setState((prevState) => ({ ...initialState,
+                        chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 라이어가 키워드를 찾았습니다.<br/>점수를 정리합니다...</p>]
+                    }));
                 }
                 else {
-                    console.log("liar is incorrect")
+                    setState((prevState) => ({ ...initialState,
+                        chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 라이어가 키워드를 찾지 못했습니다.<br/>점수를 정리합니다...</p>]
+                    }));
                 }
                 if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
-                    stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
-                        "senderId":connectionInfo.room.ownerId, 
-                        "message":{"method":"openScores", "body":null},
-                        "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-                    }));   
+                    window.setTimeout(()=> {
+                        stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
+                            "message":{"method":"openScores", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));
+                    }, 5000);
                 }  
             }
             else if(fbody.message.method === "notifyLiarAnswerTimeout") {
-                console.log("liar timeout")
+                setState((prevState) => ({ ...initialState,
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 라이어 타임아웃!<br/>점수를 정리합니다...</p>]
+                }));
                 if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
-                    stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
-                        "senderId":connectionInfo.room.ownerId, 
-                        "message":{"method":"openScores", "body":null},
-                        "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-                    }));   
-                }  
+                    window.setTimeout(()=> {
+                        stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
+                            "message":{"method":"openScores", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));
+                    }, 5000);
+                }
             }
             else if(fbody.message.method === "notifyScores") {
                 console.log("scoreboard", fbody.message.body.scoreboard)
@@ -287,19 +301,26 @@ const GameForm = ({ }) => {
                 console.log("round end");
                 if(fbody.message.body.state === "BEFORE_ROUND" && connectionInfo.room.ownerId === connectionInfo.user.userId) {
                     console.log("start round")
-                    stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
-                        "senderId":connectionInfo.room.ownerId, 
-                        "message":{"method":"startRound", "body":null},
-                        "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-                    }));  
+                    window.setTimeout(()=> {
+                        stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
+                            "message":{"method":"startRound", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                        }));
+                    }, 5000);
                 }
                 else if(fbody.message.body.state === "PUBLISH_RANKINGS" && connectionInfo.room.ownerId === connectionInfo.user.userId) {
                     console.log("publish ranking")
-                    stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
-                        "senderId":connectionInfo.room.ownerId, 
-                        "message":{"method":"publishRankings", "body":null},
-                        "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+                    setState((prevState) => ({ ...initialState,
+                        chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 최종 순위를 정리 중입니다...</p>]
                     }));
+                    window.setTimeout(()=> {
+                        stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                            "senderId":connectionInfo.room.ownerId, 
+                            "message":{"method":"publishRankings", "body":null},
+                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308",
+                        }));
+                    }, 5000);
                 }
             }
             else if(fbody.message.method === "notifyRankingsPublished") {
