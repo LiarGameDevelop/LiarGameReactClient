@@ -1,0 +1,26 @@
+{
+    "room": {
+        "ownerId": "05dec89b-7a3a-45b5-9c51-eca2a27bf604",
+        "roomId": "05dec89b-7a3a-45b5-9c51-eca2a27bf604",
+        "settings": {
+            "maxCount": 5
+        }
+    },
+    "token": {
+        "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiZmE2ZDc4My01MDFhLTQ2NWYtOTZkMC02NmYwYjBkN2NlMDVmYzE0YzQyOC1iNTY1LTRhYWQtOTczZC00OWE4OTZlMjUxNWYiLCJhdXRoIjoiUk9MRV9VU0VSIiwiZXhwIjoxNjc1MDAyMzc4fQ.rzddZApcFKVAdW3sIqNvcbFEf9xfR_ufZgH8UIbjpBRgLnqTNlCYHIfBqKC1306HVw1rTgwguRRrihcJ3w8u2A",
+        "accessTokenExpiresIn": 0,
+        "grantType": "Bearer",
+        "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE2NzUwMDIzOTN9.pQRoblyv8N1EEELJxQzbtKEkS0nE6AO6y8TZPwao5nuvbwYG4Ct81FSihK_rXMEQqlk5ZgHhZbiPJdc5oUHF-g"
+    },
+    "user": {
+        "password": "eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE2NzUwMDIzOTN9.pQRoblyv8N1EEELJxQzbtKEkS0nE6AO6y8TZPwao5nuvbwYG4Ct81FSihK_rXMEQqlk5ZgHhZbiPJdc5oUHF-g",
+        "example": "05dec89b-7a3a-45b5-9c51-eca2a27bf604",
+        "username": "dongwon"
+    },
+    "userList": [
+        {
+            "userId": "05dec89b-7a3a-45b5-9c51-eca2a27bf604",
+            "username": "jawook"
+        }
+    ]
+}

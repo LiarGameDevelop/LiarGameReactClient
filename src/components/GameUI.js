@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material';
 import { Dog1, Dog2, Dog3, Dog4, Dog5, Dog6, Cat } from '../assets/image'
 
-const PlayerIcon = [<Dog1 />, <Dog2 />, <Dog3 />, <Dog4 />, <Dog5 />, <Dog6 />, <Cat />];
+const PlayerIcon = [<Dog1 width={"60%"}/>, <Dog2 width={"60%"}/>, <Dog3 width={"60%"}/>, <Dog4 width={"60%"}/>, <Dog5 width={"60%"}/>, <Dog6 width={"60%"}/>, <Cat width={"60%"}/>];
 const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, 
     sendVote,
     sendMessage, state, setState,

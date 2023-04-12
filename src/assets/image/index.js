@@ -5,3 +5,6 @@ export { ReactComponent as Dog4 } from './dog4.svg'
 export { ReactComponent as Dog5 } from './dog5.svg'
 export { ReactComponent as Dog6 } from './dog6.svg'
 export { ReactComponent as Cat }  from './cat.svg'
+export { ReactComponent as Rule }  from './rule.svg'
+export { ReactComponent as Board }  from './Board.svg'
+export {ReactComponent as CharacterBoard} from './CharacterBoard.svg';
