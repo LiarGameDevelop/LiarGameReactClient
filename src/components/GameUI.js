@@ -1,23 +1,24 @@
 import React from 'react';
 import { Button, CircularProgress, Grid, Paper, TextField } from '@mui/material';
+import PlayerCard from './PlayerCard';
+import ResultModal from './common/ResultModal';
 import { Dog1, Dog2, Dog3, Dog4, Dog5, Dog6, Cat } from '../assets/image'
 
 const PlayerIcon = [<Dog1 width={"60%"}/>, <Dog2 width={"60%"}/>, <Dog3 width={"60%"}/>, <Dog4 width={"60%"}/>, <Dog5 width={"60%"}/>, <Dog6 width={"60%"}/>, <Cat width={"60%"}/>];
-const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members, 
-    sendVote,
-    sendMessage, state, setState,
+const GameUI = ({ isOwner, startGame, leaveTheRoom, members, sendVote, sendMessage, 
+    state, setState, result,
 }) => {
     let notice;
-    // let liarName = liar && members.length > 0 ? members.find((e)=>e.userId === liar).username : "";
     switch(state.phase) {
-        case 0: notice = "게임 시작 전 대기"; break;
-        case 1: notice = "라운드 진행 중"; break;
+        case 0: notice = "다음 게임을 준비 중입니다."; break;
+        case 1: notice = `${state.round} 라운드 진행 중`; break;
         case 2: notice = "채팅창에 힌트를 입력해주세요"; break;
-        case 3: notice = "라이어를 지목해주세요. 라이어의 아이콘을 클릭"; break;
-        case 4: notice = "투표가 종료되었습니다"; break;
-        case 5: notice = `${state.liar}님이 라이어로 지목되었습니다.`; break;
-        case 6: notice = `${state.liar}님은 라이어가 맞습니다. 정답을 맞추는 중입니다.`; break;
-        case 7: notice = `라운드가 종료되었습니다.`;
+        case 3: notice = "투표를 진행합니다. 라이어의 아이콘을 클릭하세요."; break;
+        // case 4: notice = "투표가 종료되었습니다"; break;
+        // case 5: notice = `${liarName}님이 라이어로 지목되었습니다.`; break;
+        // case 5: notice = `라이어가 지목되었습니다.`; break;
+        case 4: notice = `라이어가 정답을 맞추는 중입니다.`; break;
+        // case 7: notice = `라운드가 종료되었습니다.`;
     }
     return (
         <React.Fragment>
@@ -28,32 +29,13 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
                         {
                             Array.from({ length: (members.length+1)/2 },(_,i) => 
                             <Grid item key={i}>
-                                <Paper >
-                                    <Grid container direction="column">
-                                        <Grid item>
-                                            <Grid container direction="row" justifyContent="space-around" alignItems="center">
-                                                <Grid item onClick={()=>sendVote(2*i)}>
-                                                    {members[2*i].userId === state.liar ? PlayerIcon[6] : PlayerIcon[2*i]}
-                                                </Grid>
-                                                <Grid item>
-                                                    <Paper>
-                                                        <pre>{state.hints[2*i]}</pre>
-                                                    </Paper>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                        <Grid item>
-                                            <Grid container direction="row" justifyContent="space-around">
-                                                <Grid item>
-                                                    <p>{members[2*i].username}</p>
-                                                </Grid>
-                                                <Grid item>
-                                                    <p>승점</p>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                </Paper>
+                                <PlayerCard
+                                    icon={members[2*i].userId === state.liar ? PlayerIcon[6] : PlayerIcon[2*i]}
+                                    hint={state.hints[2*i]}
+                                    name={members[2*i].username}
+                                    score={state.scores[2*i]}
+                                    click={()=>sendVote(2*i)}
+                                />
                             </Grid>
                             )
                         }
@@ -111,6 +93,11 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
                                     <Grid item xs={10}>
                                         <TextField
                                             onChange={(e)=>setState({...state, message:e.target.value})}
+                                            onKeyPress={(e) => {
+                                                if (e.key === "Enter") {
+                                                    sendMessage()
+                                                }
+                                            }}
                                             value={state.message}
                                             style={{width:"95%"}}
                                         />
@@ -123,13 +110,8 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
                                 </Grid>    
                             </Grid>
                             <Grid item>
-                                <Button variant="contained" onClick={toResult}>
-                                    결과로-to be removed
-                                </Button>
-                            </Grid>
-                            <Grid item>
                                 <Button variant="contained" onClick={leaveTheRoom}>
-                                    방 나가기-to be removed
+                                    방 나가기
                                 </Button>
                             </Grid>
                         </Grid>
@@ -138,40 +120,24 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, toResult, members,
                         <Grid container direction="column" spacing={1}>
                         {
                             Array.from({ length: members.length/2 },(_,i) => 
-                                <Grid item key={i}>
-                                    <Paper>
-                                        <Grid container direction="column">
-                                            <Grid item>
-                                                <Grid container direction="row" justifyContent="space-around" alignItems="center">
-                                                    <Grid item onClick={()=>sendVote(2*i + 1)}>
-                                                        {members[2*i + 1].userId === state.liar ? PlayerIcon[6] : PlayerIcon[2*i + 1]}
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Paper>
-                                                            <pre>{state.hints[2*i + 1]}</pre>
-                                                        </Paper>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container direction="row" justifyContent="space-around">
-                                                    <Grid item>
-                                                        <p>{members[2*i + 1].username}</p>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <p>승점</p>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    </Paper>
-                                </Grid>
+                                <PlayerCard
+                                    icon={members[2*i + 1].userId === state.liar ? PlayerIcon[6] : PlayerIcon[2*i + 1]}
+                                    hint={state.hints[2*i + 1]}
+                                    name={members[2*i + 1].username}
+                                    score={state.scores[2*i + 1]}
+                                    click={()=>sendVote(2*i + 1)}
+                                />
                             )
                         }
                         </Grid>
                     </Grid>
                 </Grid>
             </main>
+            <ResultModal
+                result={result}
+                state={state}
+                setState={setState}
+            />
         </React.Fragment>
       );
 }

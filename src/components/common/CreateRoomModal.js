@@ -1,14 +1,13 @@
 import React from 'react';
 import { 
-    Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
-    FormControl, Grid
+    Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid
 } from '@mui/material';
 
-export default function CreateRoomModal({ state, setState, message, cancel, submit }) {
+export default function CreateRoomModal({ state, setState, message, cancel, submit, selectCategory }) {
 
     //state로 처리할지 여부 판단 필요
     const topics = [
-        "주제1", "주제2", "긴문자열~~ 주제", "주제4", "주제5", "주제6", "ex", "매우~~~~긴~~~~~~~주제"
+        "animal", "celebrity", "food", "place", "sports",
     ];
 
     return(
@@ -68,7 +67,10 @@ export default function CreateRoomModal({ state, setState, message, cancel, subm
                     {
                         Array.from({ length: topics.length },(_,i) => 
                             <Grid item xs={3} key={i}>
-                                <Button variant="contained" style={{ width: "90%" }}>
+                                <Button variant="contained" style={{ width: "90%" }}
+                                    id={ state.category.find((e)=>e===topics[i]) ? "selected" :"unselected"}
+                                    onClick={()=>selectCategory(topics[i])}
+                                >
                                     {topics[i]}
                                 </Button>
                             </Grid>

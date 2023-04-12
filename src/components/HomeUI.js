@@ -1,12 +1,10 @@
 import React from 'react';
 import { Button, Grid, TextField } from '@mui/material';
 import CreateRoomModal from './common/CreateRoomModal'
-import { Cat } from '../assets/image'
+import { Cat, Rule } from '../assets/image'
 
 const HomeUI = ({
-    createRoom, enterExisting, 
-    nickname, roomCode,
-    state, setState,
+    createRoom, enterExisting, state, setState, selectCategory
 }) => {
     const regex = new RegExp("^\\s+$");    
     return (
@@ -17,9 +15,7 @@ const HomeUI = ({
                         <Cat />
                     </Grid>
                     <Grid item>
-                        {/* <Button variant="contained" onClick={()=>setOpenHelp(true)}>
-                            게임 방법
-                        </Button> */}
+                        <Rule />
                     </Grid>
                     <Grid item>
                         <TextField
@@ -36,12 +32,12 @@ const HomeUI = ({
                         />
                     </Grid>
                     <Grid item>
-                        <Button variant="contained" disabled={ state.nickname==''||regex.test(nickname)} onClick={()=>enterExisting()}>
+                        <Button variant="contained" disabled={ state.nickname=='' || regex.test(state.nickname)} onClick={()=>enterExisting()}>
                             입장하기
                         </Button>
                     </Grid>
                     <Grid item>
-                        <Button variant="contained" disabled={ state.nickname==''||regex.test(nickname)} onClick={()=>setState({ ...state, createNew: true })}>
+                        <Button variant="contained" disabled={ state.nickname=='' || regex.test(state.nickname)} onClick={()=>setState({ ...state, createNew: true })}>
                             방만들기
                         </Button>
                     </Grid>
@@ -53,6 +49,7 @@ const HomeUI = ({
                 message="방 만들기"
                 label="player"
                 // value={connections}
+                selectCategory={selectCategory}
                 cancel={()=>setState({ ...state, createNew: false })}
                 submit={()=>{
                         setState({ ...state, createNew: false })

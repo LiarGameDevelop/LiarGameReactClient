@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import Result from '../components/ResultUI';
+import Result from '../components/common/ResultModal';
 
 const ResultForm = ({ }) => {
-    // const dispatch = useDispatch();
-    // const { connectionInfo } = useSelector(({ room }) => {
-    //   return { connectionInfo: room.connectionInfo }
-    // });
+    const { result } = useSelector(({ game }) => {
+        return { result: game.result }
+      });
 
     const navigate = useNavigate();
-
-    const membersRanked = ["철수", "영희", "민수", "Jhon", "kevu", "mike" ];
-    //어떻게 받아올지는 연구 필요
 
     const rematch = () => {
         navigate("/game");
@@ -27,7 +23,7 @@ const ResultForm = ({ }) => {
 
     return (
     <Result
-        membersRanked={membersRanked}
+        result={result}
         rematch={rematch}
         returnHome={returnHome}
     />

@@ -87,6 +87,10 @@ const room = handleActions(
             ...state,
             error,
         }),
+        [ROOM_LEAVE]: (state) => ({
+            ...state,
+            connectionInfo: null,
+        }),
     },
     initialState,
 );
