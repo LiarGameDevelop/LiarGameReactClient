@@ -264,20 +264,6 @@ const GameForm = ({ }) => {
                     }, 5000);
                 }  
             }
-            else if(fbody.message.method === "notifyLiarAnswerTimeout") {
-                setState((prevState) => ({ ...initialState,
-                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 라이어 타임아웃!<br/>점수를 정리합니다...</p>]
-                }));
-                if(connectionInfo.room.ownerId === connectionInfo.user.userId) {
-                    window.setTimeout(()=> {
-                        stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
-                            "senderId":connectionInfo.room.ownerId, 
-                            "message":{"method":"openScores", "body":null},
-                            "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-                        }));
-                    }, 5000);
-                }
-            }
             else if(fbody.message.method === "notifyScores") {
                 console.log("scoreboard", fbody.message.body.scoreboard)
                 let log = '';
