@@ -11,9 +11,9 @@ const HomeUI = ({
         <React.Fragment>
             <main>
                 <div className='divContainer'>
-                    <div style={{margin: '0 auto'}}>
-                        <Rule />
-                        <div className='homeCat'><Cat /></div>
+                    <div style={{margin: '0 auto', width: '60%'}}>
+                        <Rule width={'100%'}/>
+                        <div className='homeCat'><Cat width={'15%'}/></div>
                     </div>
                     <div className='flexContainer'>
                         <div className='marginContainer'>
