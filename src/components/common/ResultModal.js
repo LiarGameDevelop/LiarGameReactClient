@@ -19,7 +19,8 @@ const ResultModal = ({ result, state, setState }) => {
                                 Array.from(result.rankings,(_,i) =>
                                     <Grid item key={i}>
                                         <Grid container direction="row">
-                                            <div id="rank">{i+1}</div>
+                                            {i<3 ? <div className="rank" id={`rank${i}`}>{i+1}</div> 
+                                            : <div className="rank" id="rank">{i+1}</div>}
                                             <div id="rank-score">{result.rankings[i].username} : {result.rankings[i].score}</div>
                                         </Grid>
                                     </Grid>

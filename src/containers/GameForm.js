@@ -55,7 +55,7 @@ const GameForm = ({ }) => {
                 window.clearInterval(i);
             }
         }
-    },[])
+    },[]);
 
     const leaveTheRoom = () => {
         console.log("leave room")
@@ -93,6 +93,11 @@ const GameForm = ({ }) => {
                 setState((prevState) => ({ ...prevState,
                     chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length} id={`player${userIdx}`}>{userIdx === -1 ? '???' : connectionInfo.userList[userIdx].username}: {JSON.parse(frame.body).message}</p>],
                 }));
+            }
+            const textArea = document.getElementById("texting-area");
+            if(textArea) {
+                console.log("scroll down");
+                textArea.scrollTo(0, textArea.scrollHeight);
             }
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
@@ -404,6 +409,11 @@ const GameForm = ({ }) => {
                 stompClient.send(`/publish/messages.${connectionInfo.room.roomId}`, {}, JSON.stringify(m));
             }
             setState({ ...state, message: '' });
+        }
+        const textArea = document.getElementById("texting-area");
+        if(textArea) {
+            console.log("scroll down");
+            textArea.scrollTo(0, textArea.scrollHeight);
         }
     }
 

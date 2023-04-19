@@ -169,6 +169,8 @@ div#characterDiv {
   height: 80%;
   text-align: start;
   padding: 3px;
+  overflow: auto;
+
 }
 
 .hint-box::after {
@@ -179,6 +181,10 @@ div#characterDiv {
   border-right: 30px solid #cad9f1;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
+}
+
+.hint-box::-webkit-scrollbar {
+  display: none;
 }
 
 div#result-main {
@@ -235,8 +241,34 @@ div#rank {
   background-color: #62a0ff;
   text-align: center;
 }
+
+.rank {
+  width: 20px;
+  height: 20px;
+  padding: 5px;
+  border-radius: 50%;
+  border: 1px solid;
+  text-align: center;
+}
+
 div#rank-score {
   padding: 5px;
+}
+
+#rank0 {
+  background-color: #e4f315;
+}
+
+#rank1 {
+  background-color: #d5d6d4;
+}
+
+#rank2 {
+  background-color: #92761a;
+}
+
+#rank {
+  background-color: #62a0ff;
 }
 
 .divContainer {
