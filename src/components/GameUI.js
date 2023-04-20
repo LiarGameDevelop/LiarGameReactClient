@@ -14,11 +14,7 @@ const GameUI = ({ isOwner, startGame, leaveTheRoom, members, sendVote, sendMessa
         case 1: notice = `${state.round} 라운드 진행 중`; break;
         case 2: notice = "채팅창에 힌트를 입력해주세요"; break;
         case 3: notice = "투표를 진행합니다. 라이어의 아이콘을 클릭하세요."; break;
-        // case 4: notice = "투표가 종료되었습니다"; break;
-        // case 5: notice = `${liarName}님이 라이어로 지목되었습니다.`; break;
-        // case 5: notice = `라이어가 지목되었습니다.`; break;
-        case 4: notice = `라이어가 정답을 맞추는 중입니다.`; break;
-        // case 7: notice = `라운드가 종료되었습니다.`;
+        case 4: notice = "라이어가 정답을 맞추는 중입니다."; break;
         default: break;
     }
     return (

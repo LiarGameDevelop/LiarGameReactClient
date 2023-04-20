@@ -113,11 +113,22 @@ const GameForm = ({ }) => {
 
         //사람 나간것
         stompClient.subscribe(`/topic/room.${connectionInfo.room.roomId}.logout`, function (frame) {
-            console.info("Someone left", frame.body)
-            dispatch(getRoom({ "roomId": connectionInfo.room.roomId, "token": connectionInfo.token.accessToken }));
-            setState((prevState) => ({ ...prevState,
-                chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 참가자가 방을 나갔습니다.</p>],
-            }));
+            fbody=JSON.parse(frame.body);
+            console.info("Someone left", fbody)
+            if(fbody.userId === connectionInfo.room.ownerId) {
+                setState((prevState) => ({ ...prevState,
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 방장이 게임을 나갔습니다. 방에서 퇴장합니다...</p>],
+                }));
+                window.setTimeout(()=> {
+                    dispatch(leaveRoom());
+                    navigate("/");
+                }, 5000);
+            } else {
+                dispatch(getRoom({ "roomId": connectionInfo.room.roomId, "token": connectionInfo.token.accessToken }));
+                setState((prevState) => ({ ...prevState,
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 참가자가 방을 나갔습니다.</p>],
+                }));
+            }
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
 
         //게임서버랑 통신 =>방장:게임을 시작하고, 게임설정(카테고리 설정...)
