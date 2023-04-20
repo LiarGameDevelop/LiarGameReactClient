@@ -411,10 +411,10 @@ const GameForm = ({ }) => {
         if(state.mustAnswer) {
             if(connectionInfo.room.roomId) {
                 stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
-                    "senderId":connectionInfo.user.userId, 
+                    "senderId":connectionInfo.user.userId,
                     "message":{"method":"checkKeywordCorrect", "body": {"keyword": state.message}},
                     "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
-                }));  
+                }));
             }
             setState({ ...state, mustAnswer: false, message: '' });
         }
@@ -438,8 +438,24 @@ const GameForm = ({ }) => {
         }
     }
 
+    const sendTurnEnd = () => {
+        if(connectionInfo.room.roomId) {
+            setState({ ...state, fuse: 0 });
+            stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
+                "senderId":connectionInfo.user.userId,
+                "message":{"method":"requestTurnFinished", "body": {"keyword": state.message}},
+                "uuid":"a8f5bdc9-3cc7-4d9f-bde5-71ef471b9308"
+            }));
+        }
+    }
+
     const sendVote = (index) => {
         if(connectionInfo.room.roomId && connectionInfo.userList) {
+            const interval_id = window.setInterval(function(){}, Number.MAX_SAFE_INTEGER);
+            // Clear any timeout/interval up to that id
+            for (let i = 1; i < interval_id; i++) {
+                window.clearInterval(i);
+            }
             stompClient.send(`/publish/private.${connectionInfo.room.roomId}`, {}, JSON.stringify({
                 "senderId":connectionInfo.user.userId, 
                 "message":{"method":"voteLiar", "body": {"liar": connectionInfo.userList[index].userId}},
@@ -457,6 +473,7 @@ const GameForm = ({ }) => {
         members={connectionInfo ? connectionInfo.userList : []}
         category={state.category}
         keyword={state.keyword}
+        sendTurnEnd={sendTurnEnd}
         sendVote={sendVote}
         sendMessage={sendMessage}
         state={state}

@@ -21,7 +21,7 @@ const PlayerCard = ({ icon, hint, name, score, click }) => {
             <div id="player-card-level-1">
                 <div id="icon-box">
                     <div style={{marginRight: '10px'}}>score({score})- </div>
-                    {Array(score).fill(<img src={bone} alt={'boneImg'} height={'75%'}/>)}
+                    {/* {Array(score).fill(<img src={bone} alt={'boneImg'} height={'75%'}/>)} */}
                 </div>
             </div>
         </Paper>
