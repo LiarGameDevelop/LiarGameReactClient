@@ -163,7 +163,7 @@ const GameForm = ({ }) => {
                     console.log("It's your turn!")
                     const t = setInterval(() => {
                         setState((prevState) => {
-                            if(prevState.fuse === 100 || prevState.phase != 2){
+                            if(prevState.fuse === 100 || prevState.phase !== 2){
                                 console.log("end turn", t)
                                 clearInterval(t);
                                 return { ...prevState, fuse: 0 };;
@@ -173,13 +173,15 @@ const GameForm = ({ }) => {
                     }, 200);
                     setState((prevState)=>({
                         ...prevState, phase:2, turn: turn,
-                        chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: {turn.username}의 턴.</p>],
+                        chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: {turn.username}의 턴. 채팅창에 힌트를 입력해주세요.</p>,
+                        <p key={prevState.chatlog.length + 1}> [시스템]: {prevState.round} 라운드 진행 중</p>],
                     }));
                 }
                 else {
                     setState((prevState)=>({
                         ...prevState, turn: turn,
-                        chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: {turn.username}의 턴.</p>],
+                        chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: {turn.username}의 턴.</p>,
+                        <p key={prevState.chatlog.length + 1}> [시스템]: {prevState.round} 라운드 진행 중</p>],
                     }));
                 }
             }
@@ -189,7 +191,9 @@ const GameForm = ({ }) => {
             }
             else if(fbody.message.method === "notifyFindingLiarEnd") {
                 console.log("finding liar end! start voting")
-                setState((prevState)=>({ ...prevState, phase:3 }));
+                setState((prevState)=>({ ...prevState, phase:3,
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 투표를 진행합니다. 라이어의 아이콘을 클릭하세요. </p>]
+                }));
             }
             else if(fbody.message.method === "notifyVoteResult") {
                 console.log("voting end! notify result")
@@ -204,14 +208,15 @@ const GameForm = ({ }) => {
             else if(fbody.message.method === "notifyNewVoteNeeded") {
                 console.log("new vote needed")
                 setState((prevState)=>({ ...prevState, phase:3,
-                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 동점. 재투표가 필요합니다.</p>],
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 동점. 재투표가 필요합니다.</p>,
+                    <p key={prevState.chatlog.length + 1}> [시스템]: 투표를 진행합니다. 라이어의 아이콘을 클릭하세요. </p>],
                 }));
             }
             else if(fbody.message.method === "notifyLiarOpened") {
                 console.log("notify liar opened")
                 const t = setInterval(() => {
                     setState((prevState) => {
-                        if(prevState.fuse === 100 || prevState.phase != 4){
+                        if(prevState.fuse === 100 || prevState.phase !== 4){
                             console.log("end turn", t)
                             clearInterval(t);
                             return { ...prevState, fuse: 0 };;
@@ -223,13 +228,15 @@ const GameForm = ({ }) => {
                     if(fbody.message.body.matchLiar) {
                         setState((prevState)=>({
                             ...prevState, liar: fbody.message.body.liar, phase:4, mustAnswer: true,
-                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾았습니다.</p>],
+                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾았습니다.</p>,
+                            <p key={prevState.chatlog.length + 1}> [시스템]: 라이어가 정답을 맞추는 중입니다. </p>],
                         }));
                     }
                     else {
                         setState((prevState)=>({
                             ...prevState, liar: fbody.message.body.liar, phase:4, mustAnswer: true,
-                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾지 못했습니다.</p>],
+                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾지 못했습니다.</p>,
+                            <p key={prevState.chatlog.length + 1}> [시스템]: 라이어가 정답을 맞추는 중입니다. </p>],
                         }));
                     }
                 }
@@ -237,13 +244,15 @@ const GameForm = ({ }) => {
                     if(fbody.message.body.matchLiar) {
                         setState((prevState)=>({
                             ...prevState, liar: fbody.message.body.liar, phase:4,
-                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾았습니다.</p>],
+                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾았습니다.</p>,
+                            <p key={prevState.chatlog.length + 1}> [시스템]: 라이어가 정답을 맞추는 중입니다. </p>],
                         }));
                     }
                     else {
                         setState((prevState)=>({
                             ...prevState, liar: fbody.message.body.liar, phase:4,
-                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾지 못했습니다.</p>],
+                            chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 시민들이 라이어를 찾지 못했습니다.</p>,
+                            <p key={prevState.chatlog.length + 1}> [시스템]: 라이어가 정답을 맞추는 중입니다. </p>],
                         }));
                     }                 
                 }
@@ -323,7 +332,8 @@ const GameForm = ({ }) => {
             else if(fbody.message.method === "notifyGameEnd") {
                 console.log("game end")
                 setState((prevState) => ({ ...initialState, showResult: prevState.showResult,
-                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 게임이 종료되었습니다.</p>]
+                    chatlog: [...prevState.chatlog, <p key={prevState.chatlog.length}> [시스템]: 게임이 종료되었습니다.</p>,
+                    <p key={prevState.chatlog.length + 1}> [시스템]: 다음 게임을 준비 중입니다.</p>]
                 }));
             }
         }, {"Authorization": `${connectionInfo.token.grantType} ${connectionInfo.token.accessToken}`});
